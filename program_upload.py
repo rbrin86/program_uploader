@@ -5,22 +5,41 @@ def render_program_upload(navigate_to):
 
     uploaded_file = st.file_uploader("Upload a PDF of your rebate program", type="pdf")
 
+    # Simulated field extraction from PDF
     if uploaded_file:
-        st.success("✅ File uploaded successfully (simulated parsing).")
-        st.text("Here are the extracted fields (example):")
-        st.write({
-            "Program Name": "Early Order Discount 2025",
+        st.success("✅ File uploaded successfully. Extracting program details...")
+
+        # Simulated extracted data
+        extracted_data = {
+            "Program Name": "Early Order Bonus 2025",
+            "Program Owner": None,  # Missing
             "Start Date": "2025-01-01",
             "End Date": "2025-06-30",
-            "Incentive": "5% on qualifying products",
-            "Region": "Northwest"
-        })
+            "Products/Brands": None,  # Missing
+            "Incentive Amount": "5%",
+            "Incentive Type": "Fixed % Rebate",
+            "Region": None  # Missing
+        }
 
-        st.markdown("---")
+        st.subheader("🔍 Extracted Program Details")
+        missing_fields = []
+
+        for field, value in extracted_data.items():
+            if value is None:
+                missing_fields.append(field)
+                new_value = st.text_input(f"❗ Missing: {field}", placeholder="Enter value")
+                extracted_data[field] = new_value
+            else:
+                st.text_input(field, value, disabled=True)
+
         if st.button("✅ Submit Program"):
-            st.success("🎉 Program submitted successfully as Unverified.")
-            if st.button("🔙 Back to Programs"):
-                navigate_to("we_earn")
+            if any(not extracted_data[field] for field in missing_fields):
+                st.error("Please complete all missing fields before submitting.")
+            else:
+                st.success("🎉 Program submitted successfully as Unverified.")
+                if st.button("🔙 Back to Programs"):
+                    navigate_to("we_earn")
+
     else:
         if st.button("🔙 Back to Programs"):
             navigate_to("we_earn")
