@@ -2,7 +2,7 @@ import streamlit as st
 from we_earn import render_we_earn
 from program_upload import render_program_upload
 from content_queue import render_content_queue
-from program_details import render_program_details  # New import
+from program_details import render_program_details
 
 # Initialize session state for navigation
 if "page" not in st.session_state:
@@ -14,7 +14,7 @@ if "selected_program" not in st.session_state:
 
 # Navigation sidebar
 st.sidebar.title("Navigation")
-page_options = ["we_earn", "program_upload", "content_queue", "program_details"]  # Added program_details
+page_options = ["we_earn", "program_upload", "content_queue"]  # Removed program_details
 selected_page = st.sidebar.selectbox("Go to", page_options, index=page_options.index(st.session_state.page))
 
 # Update page state if the selection changes
