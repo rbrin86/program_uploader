@@ -1,23 +1,21 @@
 import streamlit as st
+from datetime import datetime
+from mock_data import program_data  # this imports the above mock
 
-# Page router setup
-def main():
-    # Initialize page if not already set
-    if "page" not in st.session_state:
-        st.session_state.page = "we_earn"
+st.set_page_config(page_title="Program Extractor", layout="centered")
 
-    # Navigation handler
-    def navigate_to(page_name):
-        st.session_state.page = page_name
+st.title("🧪 Provisional Program Review")
 
-    # Routing logic
-    if st.session_state.page == "we_earn":
-        from we_earn import render_we_earn
-        render_we_earn(navigate_to)
+st.text_input("Program Name", value=program_data["Program Name"])
+st.date_input("Start Date", value=datetime.strptime(program_data["Start Date"], "%Y-%m-%d"))
+st.date_input("End Date", value=datetime.strptime(program_data["End Date"], "%Y-%m-%d"))
+st.text_input("Segment", value=program_data["Segment"])
 
-    elif st.session_state.page == "program_upload":
-        from program_upload import render_program_upload
-        render_program_upload(navigate_to)
+st.subheader("Incentives")
+for i, rule in enumerate(program_data["Incentives"]):
+    st.text_input(f"Product {i+1}", value=rule["Product"])
+    st.text_input(f"Type {i+1}", value=rule["Type"])
+    st.text_input(f"Payout {i+1}", value=rule["Payout"])
 
-if __name__ == "__main__":
-    main()
+if st.button("Submit for Verification"):
+    st.success("✅ Program submitted for verification!")
