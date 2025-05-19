@@ -80,19 +80,6 @@ def render_we_earn(navigate_to):
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Format Status as color-coded tags
-    def format_status(status):
-        colors = {
-            "Verified": "green",
-            "Unverified": "yellow",
-            "In Review": "orange",
-            "Rejected": "red"
-        }
-        color = colors.get(status, "gray")
-        return f'<span style="background-color: {color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">{status}</span>'
-
-    filtered["Status"] = filtered["Status"].apply(format_status)
-
     # 🧾 Display table with Status in Column A
     display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
     st.dataframe(
