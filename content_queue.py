@@ -1,35 +1,43 @@
 import streamlit as st
-import sqlite3
-import pandas as pd
 
 def render_content_queue(navigate_to):
-    st.title("📋 Content Team Queue")
+    st.title("📋 Content Queue")
+    st.write("### Unverified Programs")
 
-    conn = sqlite3.connect("programs.db")
-    c = conn.cursor()
+    # Hardcoded fallback data (used if session state is empty)
+    hardcoded_programs = [
+        {
+            "Program": {
+                "Name": "Sample Program 2025",
+                "Owner": "BASF",
+                "Segment": "Ag Chem"
+            },
+            "Incentives": [
+                {"Name": "Sample Incentive", "Region": "North"}
+            ],
+            "Status": "Unverified"
+        }
+    ]
 
-    # Fetch unverified programs
-    c.execute("SELECT id, name, owner, segment, status FROM Programs WHERE status IN ('Unverified', 'In Review')")
-    programs = pd.DataFrame(c.fetchall(), columns=["ID", "Name", "Owner", "Segment", "Status"])
+    # Use session state data if available, otherwise use hardcoded data
+    programs = st.session_state.get("unverified_programs", hardcoded_programs)
 
-    st.dataframe(programs, use_container_width=True)
-
-    # Filter by program ID for review
-    program_id = st.number_input("Enter Program ID to Review", min_value=1, step=1)
-    if program_id:
-        c.execute("SELECT * FROM Programs WHERE id = ?", (program_id,))
-        program = c.fetchone()
-        if program:
-            st.subheader(f"Review Program: {program[1]}")
-            status = st.selectbox("Status", ["Unverified", "In Review", "Verified", "Rejected"])
-            feedback = st.text_area("Feedback (if Rejected)")
-            if st.button("Save Changes"):
-                c.execute("UPDATE Programs SET status = ?, feedback = ? WHERE id = ?", (status, feedback, program_id))
-                conn.commit()
-                st.success("Changes saved.")
-                if status == "Verified":
-                    st.write("Program published as live.")
-
-    conn.close()
+    if not programs:
+        st.write("No unverified programs in the queue.")
+    else:
+        for i, program in enumerate(programs):
+            with st.expander(f"Program {i+1}: {program['Program']['Name']}"):
+                st.write(f"**Owner:** {program['Program']['Owner']}")
+                st.write(f"**Segment:** {program['Program']['Segment']}")
+                st.write(f"**Status:** {program['Status']}")
+                if program['Status'] == "Unverified":
+                    if st.button("Mark as Verified", key=f"verify_{i}"):
+                        program['Status'] = "Verified"
+                        st.rerun()
+                st.write("**Incentives:**")
+                for j, incentive in enumerate(program['Incentives']):
+                    st.write(f"- {incentive['Name']} (Region: {incentive['Region']})")
+    
+    st.markdown("---")
     if st.button("🔙 Back to Programs"):
         navigate_to("we_earn")
