@@ -19,33 +19,36 @@ def render_program_upload(navigate_to):
         st.success("✅ File uploaded successfully. Extracting program details...")
 
         # Hardcoded extracted data (replace with actual OCR logic later)
-        extracted_data = {
-            "Program": {
-                "Name": "2025 Opportunity",
-                "Owner": "BASF",
-                "Start Date": "2024-10-01",
-                "End Date": "2025-09-30",
-                "Segment": "Ag Chem"
-            },
-            "Incentives": [
-                {
-                    "Name": "Q1 Rebate",
-                    "Region": None,
-                    "Incentive Type": "Fixed % Rebate",
-                    "Amount": "1%",
-                    "Paid On": "Net Purchases",
-                    "Products": ["Armezon Pro"]
+        if "extracted_data" not in st.session_state:
+            st.session_state.extracted_data = {
+                "Program": {
+                    "Name": "2025 Opportunity",
+                    "Owner": "BASF",
+                    "Start Date": "2024-10-01",
+                    "End Date": "2025-09-30",
+                    "Segment": "Ag Chem"
                 },
-                {
-                    "Name": "Q2 Growth Incentive",
-                    "Region": "Midwest",
-                    "Incentive Type": "Volume Discount",
-                    "Amount": "500",
-                    "Paid On": None,
-                    "Products": ["Basagran 5L"]
-                }
-            ]
-        }
+                "Incentives": [
+                    {
+                        "Name": "Q1 Rebate",
+                        "Region": None,
+                        "Incentive Type": "Fixed % Rebate",
+                        "Amount": "1%",
+                        "Paid On": "Net Purchases",
+                        "Products": ["Armezon Pro"]
+                    },
+                    {
+                        "Name": "Q2 Growth Incentive",
+                        "Region": "Midwest",
+                        "Incentive Type": "Volume Discount",
+                        "Amount": "500",
+                        "Paid On": None,
+                        "Products": ["Basagran 5L"]
+                    }
+                ]
+            }
+
+        extracted_data = st.session_state.extracted_data
 
         with st.container():
             st.subheader("Program Details")
@@ -124,26 +127,36 @@ def render_program_upload(navigate_to):
                             value = incentive[field]
                             if field in ["Incentive Type", "Paid On"]:
                                 options = INCENTIVE_TYPES if field == "Incentive Type" else PAID_ON_OPTIONS
+                                # Use session state to manage dropdown selections
+                                state_key = f"incentive_{i}_{field}"
+                                if state_key not in st.session_state:
+                                    st.session_state[state_key] = value if value in options else options[0]
                                 selected_value = st.selectbox(
                                     field,
                                     options,
-                                    index=options.index(value) if value in options else 0,
-                                    disabled=value is not None and value != "",
-                                    key=f"incentive_{i}_{field}"
+                                    index=options.index(st.session_state[state_key]) if st.session_state[state_key] in options else 0,
+                                    disabled=value is not None and value != "" and value != st.session_state[state_key],
+                                    key=state_key
                                 )
+                                st.session_state[state_key] = selected_value
                                 incentive[field] = selected_value
                                 if selected_value in options:
                                     st.markdown(f":white_check_mark: Valid {field.lower()}")
                             else:
+                                # Use session state to manage text inputs
+                                state_key = f"incentive_{i}_{field}"
+                                if state_key not in st.session_state:
+                                    st.session_state[state_key] = value or ""
                                 label = f"{field} (Required)" if not value or value == "" else field
                                 style = "color: red;" if not value and value != "" else ""
                                 incentive[field] = st.text_input(
                                     label,
                                     value or "",
                                     disabled=value is not None and value != "",
-                                    key=f"incentive_{i}_{field}",
+                                    key=state_key,
                                     help="Required" if not value and value != "" else None
                                 )
+                                st.session_state[state_key] = incentive[field]
                                 if not value and value != "":
                                     st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
@@ -192,7 +205,7 @@ def render_program_upload(navigate_to):
                     products_selected
                 )
 
-                # Debug: Show the status of each condition (remove after testing)
+                # Debug: Show the status of each condition and field values
                 st.write("Debug: All Fields Filled Status", {
                     "program_fields_filled": program_fields_filled,
                     "owner_valid": owner_valid,
@@ -202,6 +215,10 @@ def render_program_upload(navigate_to):
                     "products_selected": products_selected,
                     "all_fields_filled": all_fields_filled
                 })
+                st.write("Debug: Incentive Field Values", [
+                    {f: incentive[f] for f in required_incentive_fields}
+                    for incentive in extracted_data["Incentives"]
+                ])
                 st.write("Debug: Extracted Data", extracted_data)
 
                 # Submit button, disabled until all fields are valid
@@ -212,6 +229,9 @@ def render_program_upload(navigate_to):
                             "Incentives": extracted_data["Incentives"],
                             "Status": "Unverified"
                         })
+                        # Clear extracted data after submission
+                        if "extracted_data" in st.session_state:
+                            del st.session_state.extracted_data
                         st.success("🎉 Program submitted as Unverified.")
                         if st.button("🔙 Back to Programs"):
                             navigate_to("we_earn")
