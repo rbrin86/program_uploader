@@ -28,7 +28,7 @@ def render_program_upload(navigate_to):
                 {
                     "Name": "Q1 Rebate",
                     "Region": None,
-                    "Incentive Type": "Fixed % Rebate",
+                    "Price Rules Type": "Fixed % Rebate",
                     "Amount": "1%",
                     "Paid On": "Net Purchases",
                     "Products": ["Acme Fertilizer 123"]
@@ -46,7 +46,7 @@ def render_program_upload(navigate_to):
             # Incentive details
             st.subheader("Price Rules")
             for i, incentive in enumerate(extracted_data["Price Rules"]):
-                st.write(f"Incentive {i+1}")
+                st.write(f"Price Rules {i+1}")
                 for field, value in incentive.items():
                     if field != "Products":
                         incentive[field] = st.text_input(f"{field} (Incentive {i+1})", value or "", disabled=value is not None)
