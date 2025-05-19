@@ -1,7 +1,7 @@
 import streamlit as st
 
 def render_program_upload(navigate_to):
-    st.title("📤 Upload Unverified Program")
+    st.title("📤 Upload Program")
 
     # Hardcoded system values
     PRODUCT_CATALOG = ["Armezon Pro", "Basagran 5L", "Beyond Xtra", "Caramba", "Distinct", "Headline Amp"]
