@@ -85,8 +85,53 @@ def render_we_earn(navigate_to):
     st.dataframe(
         filtered[display_columns],
         use_container_width=True,
-        column_config={"Status": st.column_config.TextColumn("Status", width="small")}
+        column_config={"Status": st.column_config.TextColumn("Status", width="small")},
+        hide_index=True
     )
+
+    # Add custom JavaScript to make rows clickable
+    st.markdown("""
+        <style>
+            div[data-testid="stDataFrame"] tr:hover {
+                cursor: pointer;
+                background-color: #f0f0f0;
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const rows = document.querySelectorAll('div[data-testid="stDataFrame"] tbody tr');
+                rows.forEach((row, index) => {
+                    row.addEventListener('click', () => {
+                        window.parent.location.hash = 'program_' + index;
+                    });
+                });
+            });
+        </script>
+    """, unsafe_allow_html=True)
+
+    # Handle row click navigation
+    selected_program_idx = st.query_params.get("program", None)
+    if selected_program_idx:
+        idx = int(selected_program_idx.replace("program_", ""))
+        if 0 <= idx < len(filtered):
+            global_idx = filtered.index[idx]
+            if global_idx < len(data):  # Sample data program
+                selected_program = {
+                    "Program": {
+                        "Name": data.iloc[global_idx]["Program Name"],
+                        "Owner": data.iloc[global_idx]["Program Owner"],
+                        "Start Date": f"{data.iloc[global_idx]['Program Year']}-01-01",
+                        "End Date": f"{data.iloc[global_idx]['Program Year']}-12-31",
+                        "Segment": data.iloc[global_idx]["Segment"]
+                    },
+                    "Incentives": [],  # Placeholder
+                    "Status": data.iloc[global_idx]["Status"]
+                }
+            else:  # Unverified program
+                unverified_idx = global_idx - len(data)
+                selected_program = unverified_programs[unverified_idx]
+            navigate_to("program_details", selected_program)
+        st.query_params.clear()
 
     st.markdown("---")
     if st.button("➕ Create Program"):
