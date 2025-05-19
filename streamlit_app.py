@@ -12,10 +12,15 @@ st.sidebar.title("Navigation")
 page_options = ["we_earn", "program_upload", "content_queue"]
 selected_page = st.sidebar.selectbox("Go to", page_options, index=page_options.index(st.session_state.page))
 
+# Update page state if the selection changes
+if selected_page != st.session_state.page:
+    st.session_state.page = selected_page
+    st.rerun()
+
 # Function to navigate between pages
 def navigate_to(page):
     st.session_state.page = page
-    st.rerun()  # Replaced st.experimental_rerun() with st.rerun()
+    st.rerun()
 
 # Render the selected page
 if st.session_state.page == "we_earn":
