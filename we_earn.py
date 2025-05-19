@@ -53,9 +53,13 @@ def render_we_earn(navigate_to):
     if selected_originator != "All":
         filtered = filtered[filtered["Originator"] == selected_originator]
 
-    # 💵 Format earnings
-    filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
-    filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
+   # Sort by Earnings $ descending before formatting
+	filtered = filtered.sort_values(by="Earnings $", ascending=False)
+
+	# Format earnings
+	filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
+	filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
+
 
     # 🧾 Display table
     st.dataframe(
