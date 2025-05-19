@@ -79,7 +79,7 @@ if st.session_state.get("show_success"):
     st.success("✅ Program submitted as Unverified. It will now appear in your table.")
     st.session_state.show_success = False
 
-st.markdown("---")
-if st.button("⬅️ Back to Programs"):
-    st.session_state.page = "we_earn"
-    st.experimental_rerun()
+	st.markdown("---")
+	if st.button("⬅️ Back to Programs"):
+    	st.session_state.page = "we_earn"
+    	st.experimental_rerun()
