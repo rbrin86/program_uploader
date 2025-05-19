@@ -1,31 +1,43 @@
 import streamlit as st
-from we_earn import render_we_earn
-from program_upload import render_program_upload
-from content_queue import render_content_queue
 
-# Initialize session state for navigation
-if "page" not in st.session_state:
-    st.session_state.page = "we_earn"
+def render_content_queue(navigate_to):
+    st.title("📋 Content Queue")
+    st.write("### Unverified Programs")
 
-# Navigation sidebar
-st.sidebar.title("Navigation")
-page_options = ["we_earn", "program_upload", "content_queue"]
-selected_page = st.sidebar.selectbox("Go to", page_options, index=page_options.index(st.session_state.page))
+    # Hardcoded fallback data (used if session state is empty)
+    hardcoded_programs = [
+        {
+            "Program": {
+                "Name": "Sample Program 2025",
+                "Owner": "BASF",
+                "Segment": "Ag Chem"
+            },
+            "Incentives": [
+                {"Name": "Sample Incentive", "Region": "North"}
+            ],
+            "Status": "Unverified"
+        }
+    ]
 
-# Update page state if the selection changes
-if selected_page != st.session_state.page:
-    st.session_state.page = selected_page
-    st.rerun()
+    # Use session state data if available, otherwise use hardcoded data
+    programs = st.session_state.get("unverified_programs", hardcoded_programs)
 
-# Function to navigate between pages
-def navigate_to(page):
-    st.session_state.page = page
-    st.rerun()
-
-# Render the selected page
-if st.session_state.page == "we_earn":
-    render_we_earn(navigate_to)
-elif st.session_state.page == "program_upload":
-    render_program_upload(navigate_to)
-elif st.session_state.page == "content_queue":
-    render_content_queue(navigate_to)
+    if not programs:
+        st.write("No unverified programs in the queue.")
+    else:
+        for i, program in enumerate(programs):
+            with st.expander(f"Program {i+1}: {program['Program']['Name']}"):
+                st.write(f"**Owner:** {program['Program']['Owner']}")
+                st.write(f"**Segment:** {program['Program']['Segment']}")
+                st.write(f"**Status:** {program['Status']}")
+                if program['Status'] == "Unverified":
+                    if st.button("Mark as Verified", key=f"verify_{i}"):
+                        program['Status'] = "Verified"
+                        st.rerun()
+                st.write("**Incentives:**")
+                for j, incentive in enumerate(program['Incentives']):
+                    st.write(f"- {incentive['Name']} (Region: {incentive['Region']})")
+    
+    st.markdown("---")
+    if st.button("🔙 Back to Programs"):
+        navigate_to("we_earn")
