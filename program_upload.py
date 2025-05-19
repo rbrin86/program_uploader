@@ -1,27 +1,34 @@
 import streamlit as st
 
-# Set up session state on first load
-if "page" not in st.session_state:
-    st.session_state.page = "we_earn"
-if "do_rerun" not in st.session_state:
-    st.session_state.do_rerun = False
-if "show_success" not in st.session_state:
-    st.session_state.show_success = False
+def render_program_upload(navigate_to):
+    st.title("Upload Unverified Program")
 
-# Navigation helper
-def navigate_to(page):
-    st.session_state.page = page
-    st.session_state.do_rerun = True
+    uploaded_file = st.file_uploader("Upload a PDF Program", type=["pdf"])
 
-# Load appropriate page
-if st.session_state.page == "we_earn":
-    from we_earn import render_we_earn
-    render_we_earn(navigate_to)
-elif st.session_state.page == "program_upload":
-    from program_upload import render_program_upload
-    render_program_upload(navigate_to)
+    if uploaded_file:
+        st.info("Simulating field extraction from PDF...")
 
-# Safe rerun at the end
-if st.session_state.do_rerun:
-    st.session_state.do_rerun = False
-    st.experimental_rerun()
+        # Fake extracted data for demo
+        extracted_data = {
+            "Program Name": "Spring Discount",
+            "Start Date": "2025-03-01",
+            "End Date": "2025-06-30",
+            "Segment": "Seed",
+            "Region": "Midwest",
+            "Incentive Type": "Volume Rebate",
+            "Payout Method": "ACH",
+        }
+
+        st.subheader("📄 Extracted Fields (Editable)")
+
+        for field, value in extracted_data.items():
+            extracted_data[field] = st.text_input(field, value)
+
+        if st.button("✅ Submit Program"):
+            st.session_state.show_success = True
+            navigate_to("we_earn")
+
+    st.markdown("---")
+
+    if st.button("⬅️ Back to Programs"):
+        navigate_to("we_earn")
