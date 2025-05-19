@@ -60,8 +60,7 @@ def render_we_earn(navigate_to):
     # 🧾 Display table
     st.dataframe(
         filtered[[
-            "Program Name", "Program Owner", "Segment", "Program Year",
-            "Originator", "Earnings $", "Earnings %"
+            "Program Name", "Program Owner", "Segment", "Program Year", "Earnings $", "Earnings %"
         ]],
         use_container_width=True
     )
