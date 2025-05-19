@@ -1,3 +1,7 @@
+def render_program_upload():
+    import streamlit as st
+    st.title("Test: Program Upload Working")
+
 import streamlit as st
 from pdfminer.high_level import extract_text
 import re
