@@ -14,8 +14,10 @@ if "selected_program" not in st.session_state:
 
 # Navigation sidebar
 st.sidebar.title("Navigation")
-page_options = ["we_earn", "program_upload", "content_queue"]  # Removed program_details
-selected_page = st.sidebar.selectbox("Go to", page_options, index=page_options.index(st.session_state.page))
+page_options = ["we_earn", "program_upload", "content_queue"]
+# Set default index to 0 if current page is not in page_options
+default_index = page_options.index(st.session_state.page) if st.session_state.page in page_options else 0
+selected_page = st.sidebar.selectbox("Go to", page_options, index=default_index)
 
 # Update page state if the selection changes
 if selected_page != st.session_state.page:
