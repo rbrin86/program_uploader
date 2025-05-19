@@ -69,16 +69,16 @@ def render_program_upload(navigate_to):
                         if selected_owner in PROGRAM_OWNERS:
                             st.markdown(f":white_check_mark: Valid owner")
                     else:
-                        label = f"{field} (Required)" if not value else field
-                        style = "color: red;" if not value else ""
+                        label = f"{field} (Required)" if not value or value == "" else field
+                        style = "color: red;" if not value and value != "" else ""
                         extracted_data["Program"][field] = st.text_input(
                             label,
                             value or "",
-                            disabled=value is not None,
+                            disabled=value is not None and value != "",
                             key=f"program_{field}",
-                            help="Required" if not value else None
+                            help="Required" if not value and value != "" else None
                         )
-                        if not value:
+                        if not value and value != "":
                             st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
                 # Start Date and End Date on the same line
@@ -86,30 +86,30 @@ def render_program_upload(navigate_to):
                 for field, col in [("Start Date", col1), ("End Date", col2)]:
                     with col:
                         value = extracted_data["Program"][field]
-                        label = f"{field} (Required)" if not value else field
-                        style = "color: red;" if not value else ""
+                        label = f"{field} (Required)" if not value or value == "" else field
+                        style = "color: red;" if not value and value != "" else ""
                         extracted_data["Program"][field] = st.text_input(
                             label,
                             value or "",
-                            disabled=value is not None,
+                            disabled=value is not None and value != "",
                             key=f"program_{field}",
-                            help="Required" if not value else None
+                            help="Required" if not value and value != "" else None
                         )
-                        if not value:
+                        if not value and value != "":
                             st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
                 # Segment
                 value = extracted_data["Program"]["Segment"]
-                label = f"Segment (Required)" if not value else "Segment"
-                style = "color: red;" if not value else ""
+                label = f"Segment (Required)" if not value or value == "" else "Segment"
+                style = "color: red;" if not value and value != "" else ""
                 extracted_data["Program"]["Segment"] = st.text_input(
                     label,
                     value or "",
-                    disabled=value is not None,
+                    disabled=value is not None and value != "",
                     key="program_Segment",
-                    help="Required" if not value else None
+                    help="Required" if not value and value != "" else None
                 )
-                if not value:
+                if not value and value != "":
                     st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
                 # Divider
@@ -128,23 +128,23 @@ def render_program_upload(navigate_to):
                                     field,
                                     options,
                                     index=options.index(value) if value in options else 0,
-                                    disabled=value is not None,
+                                    disabled=value is not None and value != "",
                                     key=f"incentive_{i}_{field}"
                                 )
                                 incentive[field] = selected_value
                                 if selected_value in options:
                                     st.markdown(f":white_check_mark: Valid {field.lower()}")
                             else:
-                                label = f"{field} (Required)" if not value else field
-                                style = "color: red;" if not value else ""
+                                label = f"{field} (Required)" if not value or value == "" else field
+                                style = "color: red;" if not value and value != "" else ""
                                 incentive[field] = st.text_input(
                                     label,
                                     value or "",
-                                    disabled=value is not None,
+                                    disabled=value is not None and value != "",
                                     key=f"incentive_{i}_{field}",
-                                    help="Required" if not value else None
+                                    help="Required" if not value and value != "" else None
                                 )
-                                if not value:
+                                if not value and value != "":
                                     st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
                         # Smaller Product Mapping label
