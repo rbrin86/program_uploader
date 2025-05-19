@@ -4,9 +4,6 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
-    # Debug: Confirm script version and timestamp
-    st.write("Debug: Script executed at 02:23 PM CDT on Monday, May 19, 2025")
-
     # Sample data
     data = pd.DataFrame([
         {
@@ -58,9 +55,6 @@ def render_we_earn(navigate_to):
         ])
         data = pd.concat([data, unverified_data], ignore_index=True)
 
-    # Debug: Show combined data
-    st.write("Debug: Combined DataFrame with Unverified Programs", data)
-
     # 🔍 Filters
     st.sidebar.header("🔎 Filter Programs")
     selected_year = st.sidebar.selectbox("Program Year", ["All"] + sorted(data["Program Year"].unique()), index=0)
@@ -81,9 +75,6 @@ def render_we_earn(navigate_to):
         filtered = filtered[filtered["Originator"] == selected_originator]
     if selected_status != "All":
         filtered = filtered[filtered["Status"] == selected_status]
-
-    # Debug: Show filtered data
-    st.write("Debug: Filtered DataFrame", filtered)
 
     # 💵 Format earnings
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
