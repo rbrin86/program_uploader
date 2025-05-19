@@ -53,10 +53,11 @@ def render_program_upload(navigate_to):
             with program_form:
                 # Program details
                 required_program_fields = ["Name", "Owner", "Start Date", "End Date", "Segment"]
-                for field in required_program_fields:
+                
+                # Name and Owner
+                for field in ["Name", "Owner"]:
                     value = extracted_data["Program"][field]
                     if field == "Owner":
-                        # Dropdown for Program Owner with validation
                         selected_owner = st.selectbox(
                             field,
                             PROGRAM_OWNERS,
@@ -68,7 +69,6 @@ def render_program_upload(navigate_to):
                         if selected_owner in PROGRAM_OWNERS:
                             st.markdown(f":white_check_mark: Valid owner")
                     else:
-                        # Highlight empty required fields in red
                         label = f"{field} (Required)" if not value else field
                         style = "color: red;" if not value else ""
                         extracted_data["Program"][field] = st.text_input(
@@ -81,17 +81,48 @@ def render_program_upload(navigate_to):
                         if not value:
                             st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
-                # Horizontal divider
+                # Start Date and End Date on the same line
+                col1, col2 = st.columns(2)
+                for field, col in [("Start Date", col1), ("End Date", col2)]:
+                    with col:
+                        value = extracted_data["Program"][field]
+                        label = f"{field} (Required)" if not value else field
+                        style = "color: red;" if not value else ""
+                        extracted_data["Program"][field] = st.text_input(
+                            label,
+                            value or "",
+                            disabled=value is not None,
+                            key=f"program_{field}",
+                            help="Required" if not value else None
+                        )
+                        if not value:
+                            st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
+
+                # Segment
+                value = extracted_data["Program"]["Segment"]
+                label = f"Segment (Required)" if not value else "Segment"
+                style = "color: red;" if not value else ""
+                extracted_data["Program"]["Segment"] = st.text_input(
+                    label,
+                    value or "",
+                    disabled=value is not None,
+                    key="program_Segment",
+                    help="Required" if not value else None
+                )
+                if not value:
+                    st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
+
+                # Divider
                 st.markdown("---")
 
                 # Incentive details
                 required_incentive_fields = ["Name", "Region", "Incentive Type", "Amount", "Paid On"]
                 for i, incentive in enumerate(extracted_data["Incentives"]):
-                    with st.expander(f"Incentive {i+1} Details", expanded=True):
+                    st.subheader(f"Incentive {i+1}")
+                    with st.expander(f"Details", expanded=True):
                         for field in required_incentive_fields:
                             value = incentive[field]
                             if field in ["Incentive Type", "Paid On"]:
-                                # Dropdown for Incentive Type and Paid On with validation
                                 options = INCENTIVE_TYPES if field == "Incentive Type" else PAID_ON_OPTIONS
                                 selected_value = st.selectbox(
                                     field,
@@ -104,7 +135,6 @@ def render_program_upload(navigate_to):
                                 if selected_value in options:
                                     st.markdown(f":white_check_mark: Valid {field.lower()}")
                             else:
-                                # Highlight empty required fields in red
                                 label = f"{field} (Required)" if not value else field
                                 style = "color: red;" if not value else ""
                                 incentive[field] = st.text_input(
@@ -117,8 +147,8 @@ def render_program_upload(navigate_to):
                                 if not value:
                                     st.markdown(f"<span style='{style}'>Please fill this field</span>", unsafe_allow_html=True)
 
-                        # Smaller Product Mapping header
-                        st.markdown("<h4>Product Mapping</h4>", unsafe_allow_html=True)
+                        # Smaller Product Mapping label
+                        st.markdown("**Products**")
                         selected_products = st.multiselect(
                             "Select products",
                             PRODUCT_CATALOG,
