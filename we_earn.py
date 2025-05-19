@@ -4,10 +4,8 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
-    # Debug: Reset session state button
-    if st.button("Reset Session State (Debug)"):
-        st.session_state.unverified_programs = []
-        st.experimental_rerun()
+    # Debug: Confirm script version and timestamp
+    st.write("Debug: Script executed at 02:23 PM CDT on Monday, May 19, 2025")
 
     # Sample data
     data = pd.DataFrame([
@@ -42,9 +40,6 @@ def render_we_earn(navigate_to):
             "Status": "Verified"
         }
     ])
-
-    # Debug: Show initial data
-    st.write("Debug: Initial DataFrame", data)
 
     # Append unverified programs from session state
     unverified_programs = st.session_state.get("unverified_programs", [])
@@ -94,7 +89,20 @@ def render_we_earn(navigate_to):
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # 🧾 Display table with Status in Column A (no HTML for now)
+    # Format Status as color-coded tags
+    def format_status(status):
+        colors = {
+            "Verified": "green",
+            "Unverified": "yellow",
+            "In Review": "orange",
+            "Rejected": "red"
+        }
+        color = colors.get(status, "gray")
+        return f'<span style="background-color: {color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">{status}</span>'
+
+    filtered["Status"] = filtered["Status"].apply(format_status)
+
+    # 🧾 Display table with Status in Column A
     display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
     st.dataframe(
         filtered[display_columns],
