@@ -80,58 +80,44 @@ def render_we_earn(navigate_to):
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # 🧾 Display table with Status in Column A
-    display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
-    st.dataframe(
-        filtered[display_columns],
-        use_container_width=True,
-        column_config={"Status": st.column_config.TextColumn("Status", width="small")},
-        hide_index=True
-    )
+    # 🧾 Display table with Status in Column A using st.columns for reliable row clicks
+    st.write("#### Programs Overview")
+    if filtered.empty:
+        st.write("No programs match the selected filters.")
+    else:
+        # Display table headers
+        cols = st.columns([1, 2, 1, 1, 1, 1])
+        headers = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
+        for col, header in zip(cols, headers):
+            col.write(f"**{header}**")
 
-    # Add custom JavaScript to make rows clickable
-    st.markdown("""
-        <style>
-            div[data-testid="stDataFrame"] tr:hover {
-                cursor: pointer;
-                background-color: #f0f0f0;
-            }
-        </style>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const rows = document.querySelectorAll('div[data-testid="stDataFrame"] tbody tr');
-                rows.forEach((row, index) => {
-                    row.addEventListener('click', () => {
-                        window.parent.location.hash = 'program_' + index;
-                    });
-                });
-            });
-        </script>
-    """, unsafe_allow_html=True)
-
-    # Handle row click navigation
-    selected_program_idx = st.query_params.get("program", None)
-    if selected_program_idx:
-        idx = int(selected_program_idx.replace("program_", ""))
-        if 0 <= idx < len(filtered):
-            global_idx = filtered.index[idx]
-            if global_idx < len(data):  # Sample data program
-                selected_program = {
-                    "Program": {
-                        "Name": data.iloc[global_idx]["Program Name"],
-                        "Owner": data.iloc[global_idx]["Program Owner"],
-                        "Start Date": f"{data.iloc[global_idx]['Program Year']}-01-01",
-                        "End Date": f"{data.iloc[global_idx]['Program Year']}-12-31",
-                        "Segment": data.iloc[global_idx]["Segment"]
-                    },
-                    "Incentives": [],  # Placeholder
-                    "Status": data.iloc[global_idx]["Status"]
-                }
-            else:  # Unverified program
-                unverified_idx = global_idx - len(data)
-                selected_program = unverified_programs[unverified_idx]
-            navigate_to("program_details", selected_program)
-        st.query_params.clear()
+        # Display table rows with clickable functionality
+        for idx, row in filtered.iterrows():
+            cols = st.columns([1, 2, 1, 1, 1, 1])
+            cols[0].write(row["Status"])
+            # Make the entire row clickable by wrapping in a button
+            if cols[1].button(row["Program Name"], key=f"program_{idx}"):
+                global_idx = idx
+                if global_idx < len(data):  # Sample data program
+                    selected_program = {
+                        "Program": {
+                            "Name": data.iloc[global_idx]["Program Name"],
+                            "Owner": data.iloc[global_idx]["Program Owner"],
+                            "Start Date": f"{data.iloc[global_idx]['Program Year']}-01-01",
+                            "End Date": f"{data.iloc[global_idx]['Program Year']}-12-31",
+                            "Segment": data.iloc[global_idx]["Segment"]
+                        },
+                        "Incentives": [],  # Placeholder
+                        "Status": data.iloc[global_idx]["Status"]
+                    }
+                else:  # Unverified program
+                    unverified_idx = global_idx - len(data)
+                    selected_program = unverified_programs[unverified_idx]
+                navigate_to("program_details", selected_program)
+            cols[2].write(row["Program Owner"])
+            cols[3].write(row["Segment"])
+            cols[4].write(row["Earnings $"])
+            cols[5].write(row["Earnings %"])
 
     st.markdown("---")
     if st.button("➕ Create Program"):
