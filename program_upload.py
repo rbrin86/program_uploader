@@ -69,19 +69,23 @@ elif st.session_state.page == "upload":
         region = st.text_input("Region", value="(Optional)")
         incentive = st.text_area("Incentive Details", value="(e.g., $5/unit if > 100 units)")
 
-st.markdown("---")
+# Back to Programs
 if st.button("⬅️ Back to Programs"):
     st.session_state.page = "we_earn"
-    st.experimental_rerun()
+    st.session_state.do_rerun = True
 
-# Submit Button with Safe Rerun Handling
+# Submit Program
 if st.button("✅ Submit Program"):
     st.session_state.page = "we_earn"
     st.session_state.show_success = True
+    st.session_state.do_rerun = True
+
+# Trigger safe rerun
+if st.session_state.get("do_rerun"):
+    st.session_state.do_rerun = False
     st.experimental_rerun()
 
-# Show success message on return
+# Show success message if coming back from submission
 if st.session_state.get("show_success"):
     st.success("✅ Program submitted as Unverified. It will now appear in your table.")
     st.session_state.show_success = False
-
