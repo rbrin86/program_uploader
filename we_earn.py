@@ -80,41 +80,13 @@ def render_we_earn(navigate_to):
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # 🧾 Display table with navigation
-    st.write("#### Programs Overview")
-    if filtered.empty:
-        st.write("No programs match the selected filters.")
-    else:
-        # Make Program Name clickable
-        def make_clickable(name, row):
-            return f'<a href="#" onclick="window.parent.location.hash=\'program_{row.name}\';">{name}</a>'
-
-        filtered_with_links = filtered.copy()
-        filtered_with_links["Program Name"] = filtered.apply(lambda row: make_clickable(row["Program Name"], row), axis=1)
-        st.dataframe(filtered_with_links, use_container_width=True, hide_index=True)
-
-        # Handle program selection on click (using session state)
-        selected_program_idx = st.query_params.get("program", None)
-        if selected_program_idx:
-            idx = int(selected_program_idx.replace("program_", ""))
-            if 0 <= idx < len(data):
-                selected_program = {
-                    "Program": {
-                        "Name": data.iloc[idx]["Program Name"],
-                        "Owner": data.iloc[idx]["Program Owner"],
-                        "Start Date": f"{data.iloc[idx]['Program Year']}-01-01",
-                        "End Date": f"{data.iloc[idx]['Program Year']}-12-31",
-                        "Segment": data.iloc[idx]["Segment"]
-                    },
-                    "Incentives": [],  # Placeholder
-                    "Status": data.iloc[idx]["Status"]
-                }
-                navigate_to("program_details", selected_program)
-            elif idx < len(data) + len(unverified_programs):
-                unverified_idx = idx - len(data)
-                selected_program = unverified_programs[unverified_idx]
-                navigate_to("program_details", selected_program)
-            st.query_params.clear()
+    # 🧾 Display table with Status in Column A
+    display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
+    st.dataframe(
+        filtered[display_columns],
+        use_container_width=True,
+        column_config={"Status": st.column_config.TextColumn("Status", width="small")}
+    )
 
     st.markdown("---")
     if st.button("➕ Create Program"):
