@@ -11,13 +11,14 @@ def render_program_upload(navigate_to):
 
         # Simulated extracted data
         extracted_data = {
-            "Program Name": "Early Order Bonus 2025",
-            "Program Owner": None,  # Missing
-            "Start Date": "2025-01-01",
-            "End Date": "2025-06-30",
+            "Program Name": "2025 Opportunity",
+            "Program Owner": "BASF",
+            "Start Date": "2024-10-01",
+            "End Date": "2025-09-30",
             "Products/Brands": None,  # Missing
-            "Incentive Amount": "5%",
+            "Incentive Amount": "1%",
             "Incentive Type": "Fixed % Rebate",
+            "Paid On": "Net Purchases",
             "Region": None  # Missing
         }
 
