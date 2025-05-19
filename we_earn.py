@@ -4,6 +4,11 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
+    # Debug: Reset session state button
+    if st.button("Reset Session State (Debug)"):
+        st.session_state.unverified_programs = []
+        st.experimental_rerun()
+
     # Sample data
     data = pd.DataFrame([
         {
@@ -38,18 +43,28 @@ def render_we_earn(navigate_to):
         }
     ])
 
+    # Debug: Show initial data
+    st.write("Debug: Initial DataFrame", data)
+
     # Append unverified programs from session state
-    for program in st.session_state.get("unverified_programs", []):
-        data = pd.concat([data, pd.DataFrame([{
-            "Program Name": program["Program"]["Name"],
-            "Program Owner": program["Program"]["Owner"],
-            "Segment": program["Program"]["Segment"],
-            "Program Year": program["Program"]["Start Date"][:4],
-            "Originator": "Created as Unverified by My Org",
-            "Earnings $": 0,
-            "Earnings %": 0.0,
-            "Status": program["Status"]
-        }])], ignore_index=True)
+    unverified_programs = st.session_state.get("unverified_programs", [])
+    if unverified_programs:
+        unverified_data = pd.DataFrame([
+            {
+                "Program Name": program["Program"]["Name"],
+                "Program Owner": program["Program"]["Owner"],
+                "Segment": program["Program"]["Segment"],
+                "Program Year": program["Program"]["Start Date"][:4],
+                "Originator": "Created as Unverified by My Org",
+                "Earnings $": 0,
+                "Earnings %": 0.0,
+                "Status": program["Status"]
+            } for program in unverified_programs
+        ])
+        data = pd.concat([data, unverified_data], ignore_index=True)
+
+    # Debug: Show combined data
+    st.write("Debug: Combined DataFrame with Unverified Programs", data)
 
     # 🔍 Filters
     st.sidebar.header("🔎 Filter Programs")
@@ -72,26 +87,17 @@ def render_we_earn(navigate_to):
     if selected_status != "All":
         filtered = filtered[filtered["Status"] == selected_status]
 
+    # Debug: Show filtered data
+    st.write("Debug: Filtered DataFrame", filtered)
+
     # 💵 Format earnings
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Format Status as color-coded tags
-    def format_status(status):
-        colors = {
-            "Verified": "green",
-            "Unverified": "yellow",
-            "In Review": "orange",
-            "Rejected": "red"
-        }
-        color = colors.get(status, "gray")
-        return f'<span style="background-color: {color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">{status}</span>'
-
-    filtered["Status"] = filtered["Status"].apply(format_status)
-
-    # 🧾 Display table with Status in Column A
+    # 🧾 Display table with Status in Column A (no HTML for now)
+    display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
     st.dataframe(
-        filtered[["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]],
+        filtered[display_columns],
         use_container_width=True,
         column_config={"Status": st.column_config.TextColumn("Status", width="small")}
     )
