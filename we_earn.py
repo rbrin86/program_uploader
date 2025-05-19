@@ -2,25 +2,24 @@ import streamlit as st
 import pandas as pd
 
 def render_we_earn(navigate_to):
-    st.title("We Earn Programs")
+    st.title("💰 We Earn")
 
-    if st.session_state.get("show_success"):
-        st.success("✅ Program submitted as Unverified.")
-        st.session_state.show_success = False
-
-    # Sample table data
-    data = [
-        {"Program Name": "Growth Boost", "Program Owner": "Bayer", "Segment": "Ag Chem", "Earnings $": 12000, "Earnings %": 12, "Originator": "Published by Supplier"},
-        {"Program Name": "Seed Surge", "Program Owner": "Syngenta", "Segment": "Seed", "Earnings $": 8000, "Earnings %": 8, "Originator": "Created as unverified by my organization"},
-    ]
+    # Hardcoded table (simulate actual program data)
+    data = {
+        "Program Name": ["Q1 Growth Bonus", "Seed Loyalty", "Premium Chem"],
+        "Program Owner": ["AgroCorp", "SeedCo", "AgroCorp"],
+        "Segment": ["Fertilizer", "Seed", "Ag Chem"],
+        "Earnings $": [4500, 6200, 3100],
+        "Earnings %": [0.12, 0.18, 0.09]
+    }
     df = pd.DataFrame(data)
 
-    # Filters
-    st.selectbox("Program Year", ["2024", "2025"])
-    st.selectbox("Segment", ["All", "Ag Chem", "Seed", "Fertilizer"])
-    st.selectbox("Program Originator", ["All", "Published by Supplier", "Created as unverified by my organization"])
+    # Filters and search placeholder
+    st.text_input("🔍 Search Program Name", key="search")
+    st.selectbox("Filter by Segment", options=["All", "Fertilizer", "Seed", "Ag Chem"], key="segment_filter")
 
     st.dataframe(df)
 
-    if st.button("➕ Create Program"):
+    # Upload Program CTA
+    if st.button("📤 Create Program"):
         navigate_to("program_upload")

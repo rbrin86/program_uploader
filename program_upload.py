@@ -1,34 +1,17 @@
 import streamlit as st
 
 def render_program_upload(navigate_to):
-    st.title("Upload Unverified Program")
+    st.title("📄 Upload a Program PDF")
 
-    uploaded_file = st.file_uploader("Upload a PDF Program", type=["pdf"])
+    uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
 
     if uploaded_file:
-        st.info("Simulating field extraction from PDF...")
+        st.success("✅ PDF uploaded successfully (simulated parsing).")
 
-        # Fake extracted data for demo
-        extracted_data = {
-            "Program Name": "Spring Discount",
-            "Start Date": "2025-03-01",
-            "End Date": "2025-06-30",
-            "Segment": "Seed",
-            "Region": "Midwest",
-            "Incentive Type": "Volume Rebate",
-            "Payout Method": "ACH",
-        }
-
-        st.subheader("📄 Extracted Fields (Editable)")
-
-        for field, value in extracted_data.items():
-            extracted_data[field] = st.text_input(field, value)
-
-        if st.button("✅ Submit Program"):
-            st.session_state.show_success = True
-            navigate_to("we_earn")
-
-    st.markdown("---")
-
-    if st.button("⬅️ Back to Programs"):
-        navigate_to("we_earn")
+        # Simulated extracted data
+        st.subheader("Extracted Details (Review & Edit):")
+        st.text_input("Program Name", value="Q3 Partner Growth")
+        st.selectbox("Segment", ["Ag Chem", "Seed", "Fertilizer"], index=0)
+        st.date_input("Start Date")
+        st.date_input("End Date")
+        st.text_area("Incentive Details", value="5% bonus_
