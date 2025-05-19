@@ -158,14 +158,51 @@ def render_program_upload(navigate_to):
                         incentive["Products"] = selected_products if selected_products else []
 
                 # Check if all required fields are filled
-                all_fields_filled = (
-                    all(extracted_data["Program"][f] for f in required_program_fields) and
-                    extracted_data["Program"]["Owner"] in PROGRAM_OWNERS and
-                    all(all(incentive[f] for f in required_incentive_fields) for incentive in extracted_data["Incentives"]) and
-                    all(incentive["Incentive Type"] in INCENTIVE_TYPES for incentive in extracted_data["Incentives"]) and
-                    all(incentive["Paid On"] in PAID_ON_OPTIONS for incentive in extracted_data["Incentives"]) and
-                    all(len(incentive["Products"]) > 0 for incentive in extracted_data["Incentives"])
+                program_fields_filled = all(
+                    extracted_data["Program"][f] and extracted_data["Program"][f] != "" 
+                    for f in required_program_fields
                 )
+                owner_valid = extracted_data["Program"]["Owner"] in PROGRAM_OWNERS
+                incentives_filled = all(
+                    all(
+                        incentive[f] and incentive[f] != "" 
+                        for f in required_incentive_fields
+                    )
+                    for incentive in extracted_data["Incentives"]
+                )
+                incentive_types_valid = all(
+                    incentive["Incentive Type"] in INCENTIVE_TYPES 
+                    for incentive in extracted_data["Incentives"]
+                )
+                paid_on_valid = all(
+                    incentive["Paid On"] in PAID_ON_OPTIONS 
+                    for incentive in extracted_data["Incentives"]
+                )
+                products_selected = all(
+                    len(incentive["Products"]) > 0 
+                    for incentive in extracted_data["Incentives"]
+                )
+
+                all_fields_filled = (
+                    program_fields_filled and
+                    owner_valid and
+                    incentives_filled and
+                    incentive_types_valid and
+                    paid_on_valid and
+                    products_selected
+                )
+
+                # Debug: Show the status of each condition (remove after testing)
+                st.write("Debug: All Fields Filled Status", {
+                    "program_fields_filled": program_fields_filled,
+                    "owner_valid": owner_valid,
+                    "incentives_filled": incentives_filled,
+                    "incentive_types_valid": incentive_types_valid,
+                    "paid_on_valid": paid_on_valid,
+                    "products_selected": products_selected,
+                    "all_fields_filled": all_fields_filled
+                })
+                st.write("Debug: Extracted Data", extracted_data)
 
                 # Submit button, disabled until all fields are valid
                 if st.form_submit_button("✅ Submit Program", disabled=not all_fields_filled):
