@@ -80,74 +80,42 @@ def render_we_earn(navigate_to):
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # 🧾 Display table with multi-select and navigation
+    # 🧾 Display table with navigation
     st.write("#### Programs Overview")
     if filtered.empty:
         st.write("No programs match the selected filters.")
     else:
-        # Initialize selection state
-        if "selected_indices" not in st.session_state:
-            st.session_state.selected_indices = []
+        # Make Program Name clickable
+        def make_clickable(name, row):
+            return f'<a href="#" onclick="window.parent.location.hash=\'program_{row.name}\';">{name}</a>'
 
-        # Prepare table data
-        table_data = filtered.reset_index().to_dict("records")
-        cols = st.columns([0.5, 2, 1, 1, 1, 1, 1])  # Checkbox, Program Name, Owner, Segment, Earnings $, Earnings %, Status
-        headers = ["", "Program Name", "Owner", "Segment", "Earnings $", "Earnings %", "Status"]
-        for col, header in zip(cols, headers):
-            col.write(f"**{header}**")
+        filtered_with_links = filtered.copy()
+        filtered_with_links["Program Name"] = filtered.apply(lambda row: make_clickable(row["Program Name"], row), axis=1)
+        st.dataframe(filtered_with_links, use_container_width=True, hide_index=True)
 
-        for i, row in enumerate(table_data):
-            cols = st.columns([0.5, 2, 1, 1, 1, 1, 1])
-            cols[0].checkbox("", key=f"select_{i}", value=i in st.session_state.selected_indices, on_change=lambda x=i: update_selection(x))
-            # Make Program Name clickable to navigate to program details
-            if cols[1].button(row["Program Name"], key=f"program_{i}"):
-                # Find the corresponding program in data or unverified_programs
-                program_idx = i
-                if i >= len(data) and unverified_programs:
-                    program_idx = i - len(data)
-                    selected_program = unverified_programs[program_idx]
-                else:
-                    selected_program = {
-                        "Program": {
-                            "Name": row["Program Name"],
-                            "Owner": row["Program Owner"],
-                            "Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
-                            "End Date": f"{row['Program Year']}-12-31",    # Placeholder date
-                            "Segment": row["Segment"]
-                        },
-                        "Incentives": [],  # Placeholder, to be expanded
-                        "Status": row["Status"]
-                    }
+        # Handle program selection on click (using session state)
+        selected_program_idx = st.query_params.get("program", None)
+        if selected_program_idx:
+            idx = int(selected_program_idx.replace("program_", ""))
+            if 0 <= idx < len(data):
+                selected_program = {
+                    "Program": {
+                        "Name": data.iloc[idx]["Program Name"],
+                        "Owner": data.iloc[idx]["Program Owner"],
+                        "Start Date": f"{data.iloc[idx]['Program Year']}-01-01",
+                        "End Date": f"{data.iloc[idx]['Program Year']}-12-31",
+                        "Segment": data.iloc[idx]["Segment"]
+                    },
+                    "Incentives": [],  # Placeholder
+                    "Status": data.iloc[idx]["Status"]
+                }
                 navigate_to("program_details", selected_program)
-            cols[2].write(row["Program Owner"])
-            cols[3].write(row["Segment"])
-            cols[4].write(row["Earnings $"])
-            cols[5].write(row["Earnings %"])
-            cols[6].write(row["Status"])
+            elif idx < len(data) + len(unverified_programs):
+                unverified_idx = idx - len(data)
+                selected_program = unverified_programs[unverified_idx]
+                navigate_to("program_details", selected_program)
+            st.query_params.clear()
 
-        # Bulk update form
-        with st.form(key="bulk_update_form"):
-            new_segment = st.selectbox("Update Segment To", [""] + sorted(data["Segment"].unique()), index=0)
-            if st.form_submit_button("Apply Bulk Update"):
-                if new_segment and st.session_state.selected_indices:
-                    for idx in st.session_state.selected_indices:
-                        if idx < len(data):  # Update sample data
-                            data.loc[idx, "Segment"] = new_segment
-                        if idx < len(data) and idx < len(unverified_programs):  # Update unverified programs
-                            unverified_programs[idx]["Program"]["Segment"] = new_segment
-                    st.session_state.selected_indices = []  # Clear selection after update
-                    st.success("Segment updated successfully for selected programs.")
-                    st.rerun()
-                else:
-                    st.error("Please select at least one program and choose a segment.")
-
-def update_selection(index):
-    if index in st.session_state.selected_indices:
-        st.session_state.selected_indices.remove(index)
-    else:
-        st.session_state.selected_indices.append(index)
-    st.session_state.selected_indices = sorted(list(set(st.session_state.selected_indices)))
-
-st.markdown("---")
-if st.button("➕ Create Program"):
-    navigate_to("program_upload")
+    st.markdown("---")
+    if st.button("➕ Create Program"):
+        navigate_to("program_upload")
