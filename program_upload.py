@@ -69,11 +69,17 @@ elif st.session_state.page == "upload":
         region = st.text_input("Region", value="(Optional)")
         incentive = st.text_area("Incentive Details", value="(e.g., $5/unit if > 100 units)")
 
-        if st.button("✅ Submit Program"):
-            st.success("Program submitted as Unverified. It will now appear in your table.")
-            st.session_state.page = "we_earn"
-            st.experimental_rerun()
+      if st.button("✅ Submit Program"):
+    st.session_state.page = "we_earn"
+    st.session_state.show_success = True
+    st.experimental_rerun()
 
-    if st.button("⬅️ Back to Programs"):
-        st.session_state.page = "we_earn"
-        st.experimental_rerun()
+# Show success message if redirected from upload
+if st.session_state.get("show_success"):
+    st.success("✅ Program submitted as Unverified. It will now appear in your table.")
+    st.session_state.show_success = False
+
+st.markdown("---")
+if st.button("⬅️ Back to Programs"):
+    st.session_state.page = "we_earn"
+    st.experimental_rerun()
