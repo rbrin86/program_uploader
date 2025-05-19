@@ -1,66 +1,79 @@
 import streamlit as st
+import pandas as pd
 import pdfplumber
-import re
-from datetime import datetime
 
-st.set_page_config(page_title="Program Extractor", layout="centered")
+# Session state to manage page transitions
+if "page" not in st.session_state:
+    st.session_state.page = "we_earn"
 
-st.title("📄 Rebate Program Extractor (Simulated)")
+# Dummy data for "We Earn" page
+data = pd.DataFrame([
+    {"Program Name": "2025 Growth Rebate", "Program Owner": "CropStrong", "Segment": "Ag Chem", "Earnings $": 24000, "Earnings %": 12, "Year": 2025, "Originator": "Published by Supplier"},
+    {"Program Name": "Seed Launch Bonus", "Program Owner": "GrowPro", "Segment": "Seed", "Earnings $": 15000, "Earnings %": 8, "Year": 2025, "Originator": "Created by My Org"},
+    {"Program Name": "Promarket Winter Promo", "Program Owner": "CropStrong", "Segment": "Promarket", "Earnings $": 8000, "Earnings %": 5, "Year": 2024, "Originator": "Published by Supplier"},
+])
 
-uploaded_file = st.file_uploader("Upload a rebate program PDF", type="pdf")
+# ---- PAGE: We Earn ----
+if st.session_state.page == "we_earn":
+    st.title("We Earn")
+    st.markdown("View and manage your active rebate programs.")
 
-if uploaded_file:
-    with pdfplumber.open(uploaded_file) as pdf:
-        text = ""
-        for page in pdf.pages:
-            text += page.extract_text() + "\n"
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        if st.button("➕ Create Program"):
+            st.session_state.page = "upload"
+            st.experimental_rerun()
 
-    st.subheader("Extracted Text")
-    st.text_area("PDF Text", text, height=300)
+    with st.expander("🔍 Filters"):
+        search = st.text_input("Search Program Name")
+        year = st.selectbox("Program Year", options=[None, 2025, 2024])
+        segment = st.selectbox("Segment", options=[None, "Ag Chem", "Seed", "Promarket", "Fertilizer", "Seed Treatment"])
+        owner = st.selectbox("Program Owner", options=[None] + sorted(data["Program Owner"].unique()))
+        origin = st.selectbox("Originator", options=[None, "Published by Supplier", "Created by My Org"])
 
-    # Simulate field extraction
-    st.subheader("Program Fields")
+    df = data.copy()
+    if search:
+        df = df[df["Program Name"].str.contains(search, case=False)]
+    if year:
+        df = df[df["Year"] == year]
+    if segment:
+        df = df[df["Segment"] == segment]
+    if owner:
+        df = df[df["Program Owner"] == owner]
+    if origin:
+        df = df[df["Originator"] == origin]
 
-    def find_date(pattern, fallback):
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            try:
-                return datetime.strptime(match.group(1), "%B %d, %Y").date()
-            except:
-                return fallback
-        return fallback
+    st.dataframe(df[["Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]], use_container_width=True)
 
-    def find_field(pattern, fallback):
-        match = re.search(pattern, text, re.IGNORECASE)
-        return match.group(1).strip() if match else fallback
+# ---- PAGE: Upload PDF and Extract ----
+elif st.session_state.page == "upload":
+    st.title("Create Unverified Program")
+    st.markdown("Upload a PDF to extract program details.")
 
-    program_name = find_field(r"Program Name[:\-]\s*(.*)", "")
-    start_date = find_date(r"Start Date[:\-]\s*([A-Za-z]+ \d{1,2}, \d{4})", None)
-    end_date = find_date(r"End Date[:\-]\s*([A-Za-z]+ \d{1,2}, \d{4})", None)
-    segment = find_field(r"Segment[:\-]\s*(.*)", "")
-    incentive_type = find_field(r"Incentive Type[:\-]\s*(.*)", "")
-    payout = find_field(r"Payout[:\-]\s*(.*)", "")
+    uploaded_file = st.file_uploader("Upload rebate program PDF", type="pdf")
+    extracted_text = ""
 
-    # Form for manual review
-    program_name = st.text_input("Program Name", value=program_name)
-    start_date = st.date_input("Start Date", value=start_date) if start_date else st.date_input("Start Date")
-    end_date = st.date_input("End Date", value=end_date) if end_date else st.date_input("End Date")
-    segment = st.text_input("Segment", value=segment)
-    incentive_type = st.text_input("Incentive Type", value=incentive_type)
-    payout = st.text_input("Payout", value=payout)
+    if uploaded_file is not None:
+        with pdfplumber.open(uploaded_file) as pdf:
+            extracted_text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
 
-    st.subheader("Review Status")
-    missing_fields = []
-    if not program_name: missing_fields.append("Program Name")
-    if not start_date: missing_fields.append("Start Date")
-    if not end_date: missing_fields.append("End Date")
-    if not incentive_type: missing_fields.append("Incentive Type")
-    if not payout: missing_fields.append("Payout")
+        st.success("✅ Extracted text from PDF.")
+        st.text_area("📄 Raw Extracted Text", extracted_text, height=300)
 
-    if missing_fields:
-        st.warning(f"⚠️ Missing or unclear: {', '.join(missing_fields)}")
-    else:
-        st.success("✅ All fields look complete!")
+        # Simulate parsing values
+        st.subheader("📝 Review Extracted Fields")
+        program_name = st.text_input("Program Name", value="(try pulling from PDF text)")
+        program_owner = st.text_input("Program Owner", value="(e.g., CropStrong)")
+        segment = st.selectbox("Segment", options=["Ag Chem", "Seed", "Promarket", "Fertilizer", "Seed Treatment"])
+        year = st.selectbox("Program Year", options=[2024, 2025])
+        region = st.text_input("Region", value="(Optional)")
+        incentive = st.text_area("Incentive Details", value="(e.g., $5/unit if > 100 units)")
 
-    if st.button("Submit for Verification"):
-        st.success("🎉 Program submitted for verification queue!")
+        if st.button("✅ Submit Program"):
+            st.success("Program submitted as Unverified. It will now appear in your table.")
+            st.session_state.page = "we_earn"
+            st.experimental_rerun()
+
+    if st.button("⬅️ Back to Programs"):
+        st.session_state.page = "we_earn"
+        st.experimental_rerun()
