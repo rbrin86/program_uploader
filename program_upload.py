@@ -1,46 +1,79 @@
 import streamlit as st
+from pdfminer.high_level import extract_text
+import re
 
-def render_program_upload(navigate_to):
-    st.title("📤 Upload Unverified Program")
+# -------------------
+# Utils for extraction
+# -------------------
+def extract_program_info(text):
+    program = {
+        "Program Name": extract_field(text, r"Program Name[:\s]+(.+?)\n"),
+        "Program Owner": extract_field(text, r"Program Owner[:\s]+(.+?)\n"),
+        "Start Date": extract_field(text, r"Start Date[:\s]+(.+?)\n"),
+        "End Date": extract_field(text, r"End Date[:\s]+(.+?)\n"),
+        "Segment": extract_field(text, r"Segment[:\s]+(.+?)\n"),
+        "Region": extract_field(text, r"Region[:\s]+(.+?)\n")
+    }
+    return program
 
-    uploaded_file = st.file_uploader("Upload a PDF of your rebate program", type="pdf")
-
-    # Simulated field extraction from PDF
-    if uploaded_file:
-        st.success("✅ File uploaded successfully. Extracting program details...")
-
-        # Simulated extracted data
-        extracted_data = {
-            "Program Name": "2025 Opportunity",
-            "Program Owner": "BASF",
-            "Start Date": "2024-10-01",
-            "End Date": "2025-09-30",
-            "Products/Brands": None,  # Missing
-            "Incentive Amount": "1%",
-            "Incentive Type": "Fixed % Rebate",
-            "Paid On": "Net Purchases",
-            "Region": None  # Missing
+def extract_incentives(text):
+    incentives = []
+    blocks = re.split(r"(?i)Incentive Name[:\s]", text)[1:]  # naive split
+    for block in blocks:
+        fields = {
+            "Incentive Name": block.split('\n')[0].strip(),
+            "Region": extract_field(block, r"Region[:\s]+(.+?)\n"),
+            "Incentive Type": extract_field(block, r"Type[:\s]+(.+?)\n"),
+            "Amount": extract_field(block, r"Amount[:\s\$%]+([\d\.,]+)")
         }
+        incentives.append(fields)
+    return incentives
 
-        st.subheader("🔍 Extracted Program Details")
-        missing_fields = []
+def extract_field(text, pattern):
+    match = re.search(pattern, text, re.IGNORECASE)
+    return match.group(1).strip() if match else ""
 
-        for field, value in extracted_data.items():
-            if value is None:
-                missing_fields.append(field)
-                new_value = st.text_input(f"❗ Missing: {field}", placeholder="Enter value")
-                extracted_data[field] = new_value
-            else:
-                st.text_input(field, value, disabled=True)
+# -------------------
+# Streamlit App
+# -------------------
+def main():
+    st.title("Program Upload")
+    st.markdown("Upload a Program PDF to extract both Program details and Incentives")
 
-        if st.button("✅ Submit Program"):
-            if any(not extracted_data[field] for field in missing_fields):
-                st.error("Please complete all missing fields before submitting.")
-            else:
-                st.success("🎉 Program submitted successfully as Unverified.")
-                if st.button("🔙 Back to Programs"):
-                    navigate_to("we_earn")
+    uploaded_file = st.file_uploader("Upload PDF", type="pdf")
 
-    else:
-        if st.button("🔙 Back to Programs"):
-            navigate_to("we_earn")
+    if uploaded_file:
+        text = extract_text(uploaded_file)
+        program_info = extract_program_info(text)
+        incentives = extract_incentives(text)
+
+        st.subheader("Program Details")
+        for field, value in program_info.items():
+            st.text_input(field, value)
+
+        st.subheader("Incentives")
+        for i, inc in enumerate(incentives):
+            with st.expander(f"Incentive {i+1}: {inc['Incentive Name']}"):
+                for field, value in inc.items():
+                    st.text_input(f"{field} (Incentive {i+1})", value)
+
+        st.subheader("Missing Fields")
+        missing = []
+        for field, value in program_info.items():
+            if not value:
+                missing.append(field)
+        for i, inc in enumerate(incentives):
+            for field, value in inc.items():
+                if not value:
+                    missing.append(f"{field} in Incentive {i+1}")
+
+        if missing:
+            st.warning("Missing Fields:")
+            for field in missing:
+                st.write(f"- {field}")
+
+        if st.button("Submit Program"):
+            st.success("Program and incentives submitted successfully (simulated)")
+
+if __name__ == "__main__":
+    main()
