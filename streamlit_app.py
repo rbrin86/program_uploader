@@ -10,11 +10,6 @@ if "page" not in st.session_state:
 if "selected_program" not in st.session_state:
     st.session_state.selected_program = None
 
-# Debug: Display session state in sidebar
-st.sidebar.title("Navigation")
-st.sidebar.write(f"Debug: Current page: {st.session_state.page}")
-st.sidebar.write(f"Debug: Selected program: {st.session_state.selected_program}")
-
 # Navigation sidebar
 visible_pages = ["we_earn", "program_upload", "content_queue"]
 page_options = visible_pages + ["program_details"]
@@ -22,7 +17,6 @@ page_options = visible_pages + ["program_details"]
 selected_page = st.sidebar.selectbox("Go to", visible_pages, index=visible_pages.index(st.session_state.page) if st.session_state.page in visible_pages else 0)
 
 default_index = page_options.index(st.session_state.page) if st.session_state.page in page_options else 0
-selected_page = st.sidebar.selectbox("Go to", page_options, index=default_index)
 
 # Update page state if changed
 if selected_page != st.session_state.page:
@@ -32,7 +26,6 @@ if selected_page != st.session_state.page:
     st.rerun()
 
 # Render the selected page
-st.write(f"Debug: Rendering page: {st.session_state.page}")
 if st.session_state.page == "we_earn":
     render_we_earn(lambda page, program=None: (st.session_state.update({"page": page, "selected_program": program}), st.rerun()))
 elif st.session_state.page == "program_upload":
