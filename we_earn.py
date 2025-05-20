@@ -4,9 +4,6 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
-    # Debug: Display current session state
-    st.write(f"Debug: Current session state - page: {st.session_state.get('page')}, selected_program: {st.session_state.get('selected_program')}")
-
     # Sample data
     data = pd.DataFrame([
         {
@@ -103,22 +100,22 @@ def render_we_earn(navigate_to):
     )
 
     # Handle navigation for View Details buttons
-	st.markdown("### Select a Program to View Details")
-	for i, row in filtered.iterrows():
-    	program_data = {
-        	"Program": {
-            	"Name": row["Program Name"],
-            	"Owner": row["Program Owner"],
-            	"Segment": row["Segment"],
-            	"Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
-            	"End Date": f"{row['Program Year']}-12-31",    # Placeholder date
-        	},
-        	"Status": row["Status"]
-    	}
-    	button_key = f"view_details_{row['Program Name'].replace(' ', '_')}_{i}"
-    	if st.button(f"View {row['Program Name']}", key=button_key):
-        	st.write(f"Debug: Navigating to program_details with: {program_data}")
-        	navigate_to("program_details", program_data)
+    st.markdown("### Select a Program to View Details")
+    for i, row in filtered.iterrows():
+        program_data = {
+            "Program": {
+                "Name": row["Program Name"],
+                "Owner": row["Program Owner"],
+                "Segment": row["Segment"],
+                "Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
+                "End Date": f"{row['Program Year']}-12-31",    # Placeholder date
+            },
+            "Status": row["Status"]
+        }
+        button_key = f"view_details_{row['Program Name'].replace(' ', '_')}_{i}"
+        if st.button(f"View {row['Program Name']}", key=button_key):
+            st.write(f"Debug: Navigating to program_details with: {program_data}")
+            navigate_to("program_details", program_data)
 
     st.markdown("---")
     if st.button("➕ Create Program"):
