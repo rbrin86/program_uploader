@@ -4,6 +4,24 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
+    # Test navigation with a simple button
+    st.write("### Navigation Test")
+    if st.button("Go to Program Details (Test)", key="test_navigate"):
+        st.write("Debug: Test button clicked")
+        selected_program = {
+            "Program": {
+                "Name": "Test Program",
+                "Owner": "Test Owner",
+                "Start Date": "2025-01-01",
+                "End Date": "2025-12-31",
+                "Segment": "Test Segment"
+            },
+            "Incentives": [],
+            "Status": "Test Status"
+        }
+        st.write("Debug: Calling navigate_to with program: Test Program")
+        navigate_to("program_details", selected_program)
+
     # Sample data
     data = pd.DataFrame([
         {
@@ -86,8 +104,8 @@ def render_we_earn(navigate_to):
             cols = st.columns([1, 2, 1, 1, 1, 1])
             cols[0].write(row["Status"])
             if cols[1].button(row["Program Name"], key=f"program_{idx}"):
-                st.write(f"Debug: Clicked program at index {idx}")  # Debug message
-                if idx < len(data):  # Sample data program
+                st.write(f"Debug: Clicked program at index {idx}")
+                if idx < len(data):
                     selected_program = {
                         "Program": {
                             "Name": data.iloc[idx]["Program Name"],
@@ -96,13 +114,13 @@ def render_we_earn(navigate_to):
                             "End Date": f"{data.iloc[idx]['Program Year']}-12-31",
                             "Segment": data.iloc[idx]["Segment"]
                         },
-                        "Incentives": [],  # Placeholder
+                        "Incentives": [],
                         "Status": data.iloc[idx]["Status"]
                     }
-                else:  # Unverified program
+                else:
                     unverified_idx = idx - len(data)
                     selected_program = unverified_programs[unverified_idx]
-                st.write(f"Debug: Navigating to program_details with program: {selected_program['Program']['Name']}")  # Debug message
+                st.write(f"Debug: Navigating to program_details with program: {selected_program['Program']['Name']}")
                 navigate_to("program_details", selected_program)
             cols[2].write(row["Program Owner"])
             cols[3].write(row["Segment"])
@@ -111,4 +129,5 @@ def render_we_earn(navigate_to):
 
     st.markdown("---")
     if st.button("➕ Create Program"):
+        st.write("Debug: Create Program button clicked")
         navigate_to("program_upload")

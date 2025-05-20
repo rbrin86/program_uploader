@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 
 def render_program_details(navigate_to):
+    st.write("Debug: Rendering Program Details page")  # Debug message
     st.title("📋 Program Details")
     selected_program = st.session_state.get("selected_program")
 
@@ -31,7 +32,6 @@ def render_program_details(navigate_to):
         st.subheader("Incentives")
         incentives = selected_program.get("Incentives", [])
         if not incentives:
-            # Fallback to example incentives if none exist (for sample programs)
             incentives = [
                 {
                     "Name": "Additional Rebate - 10 brands",
@@ -58,7 +58,6 @@ def render_program_details(navigate_to):
                     "Current Earnings": "$0"
                 }
             ]
-        # Create table
         data = {
             "Name": [inc["Name"] for inc in incentives],
             "Transaction Eligibility Period": [f"{inc.get('Start Date', 'N/A')} - {inc.get('End Date', 'N/A')}" for inc in incentives],
