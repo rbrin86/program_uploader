@@ -81,7 +81,7 @@ def render_we_earn(navigate_to):
     display_data["Earnings $"] = display_data["Earnings $"].apply(lambda x: f"${x:,.2f}")
     display_data["Earnings %"] = display_data["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Add a "View Details" column
+    # Add a "View Details" column with buttons
     display_data["View Details"] = [
         f"View {row['Program Name']}" for _, row in display_data.iterrows()
     ]
@@ -100,6 +100,7 @@ def render_we_earn(navigate_to):
     )
 
     # Handle navigation for View Details buttons
+    st.markdown("### Select a Program to View Details")
     for i, row in filtered.iterrows():
         program_data = {
             "Program": {
@@ -111,7 +112,8 @@ def render_we_earn(navigate_to):
             },
             "Status": row["Status"]
         }
-        if st.button(f"View {row['Program Name']}", key=f"view_details_{i}"):
+        if st.button(f"View {row['Program Name']}", key=f"view_details_{row['Program Name']}_{i}"):
+            st.write(f"Debug: Clicking View for {row['Program Name']}, navigating to program_details")
             navigate_to("program_details", program=program_data)
 
     st.markdown("---")

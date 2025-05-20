@@ -18,13 +18,20 @@ page_options = ["we_earn", "program_upload", "content_queue"]
 default_index = page_options.index(st.session_state.page) if st.session_state.page in page_options else 0
 selected_page = st.sidebar.selectbox("Go to", page_options, index=default_index)
 
+# Debug: Display current page and selected program
+st.sidebar.write(f"Debug: Current page: {st.session_state.page}")
+st.sidebar.write(f"Debug: Selected program: {st.session_state.selected_program}")
+
 # Update page state if the selection changes
 if selected_page != st.session_state.page:
     st.session_state.page = selected_page
+    st.session_state.selected_program = None  # Reset selected program when changing pages
+    st.write(f"Debug: Navigating to {selected_page}")
     st.rerun()
 
 # Function to navigate between pages
 def navigate_to(page, program=None):
+    st.write(f"Debug: navigate_to called with page={page}, program={program}")
     st.session_state.page = page
     st.session_state.selected_program = program
     st.rerun()

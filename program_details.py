@@ -2,13 +2,15 @@ import streamlit as st
 import pandas as pd
 
 def render_program_details(navigate_to):
-    st.write("Debug: Rendering Program Details page")  # Debug message
+    st.write("Debug: Rendering Program Details page")
+    st.write(f"Debug: Selected program: {st.session_state.get('selected_program')}")
     st.title("📋 Program Details")
     selected_program = st.session_state.get("selected_program")
 
     if not selected_program:
         st.write("No program selected. Please select a program from the 'We Earn' page.")
         if st.button("🔙 Back to We Earn"):
+            st.write("Debug: Navigating back to we_earn")
             navigate_to("we_earn", None)
         return
 
@@ -82,4 +84,5 @@ def render_program_details(navigate_to):
 
     st.markdown("---")
     if st.button("🔙 Back to We Earn"):
+        st.write("Debug: Navigating back to we_earn")
         navigate_to("we_earn", None)
