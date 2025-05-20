@@ -76,17 +76,43 @@ def render_we_earn(navigate_to):
     if selected_status != "All":
         filtered = filtered[filtered["Status"] == selected_status]
 
-    # 💵 Format earnings
-    filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
-    filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
+    # 💵 Format earnings for display
+    display_data = filtered.copy()
+    display_data["Earnings $"] = display_data["Earnings $"].apply(lambda x: f"${x:,.2f}")
+    display_data["Earnings %"] = display_data["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # 🧾 Display table with Status in Column A
-    display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
+    # Add a "View Details" column
+    display_data["View Details"] = [
+        f"View {row['Program Name']}" for _, row in display_data.iterrows()
+    ]
+
+    # 🧾 Display table with Status in Column A and View Details column
+    display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %", "View Details"]
     st.dataframe(
-        filtered[display_columns],
+        display_data[display_columns],
         use_container_width=True,
-        column_config={"Status": st.column_config.TextColumn("Status", width="small")}
+        column_config={
+            "Status": st.column_config.TextColumn("Status", width="small"),
+            "Program Name": st.column_config.TextColumn("Program Name", width="medium"),
+            "View Details": st.column_config.TextColumn("View Details", width="small")
+        },
+        hide_index=True
     )
+
+    # Handle navigation for View Details buttons
+    for i, row in filtered.iterrows():
+        program_data = {
+            "Program": {
+                "Name": row["Program Name"],
+                "Owner": row["Program Owner"],
+                "Segment": row["Segment"],
+                "Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
+                "End Date": f"{row['Program Year']}-12-31",    # Placeholder date
+            },
+            "Status": row["Status"]
+        }
+        if st.button(f"View {row['Program Name']}", key=f"view_details_{i}"):
+            navigate_to("program_details", program=program_data)
 
     st.markdown("---")
     if st.button("➕ Create Program"):
