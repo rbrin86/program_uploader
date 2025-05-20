@@ -25,10 +25,9 @@ if selected_page != st.session_state.page:
 
 # Function to navigate between pages
 def navigate_to(page, program=None):
-    st.write(f"Debug: Navigating to {page}")  # Debug message
     st.session_state.page = page
     st.session_state.selected_program = program
-    st.rerun()  # Use st.rerun() instead of st.experimental_rerun()
+    st.rerun()
 
 # Render the selected page
 if st.session_state.page == "we_earn":
