@@ -92,12 +92,11 @@ def render_we_earn(navigate_to):
             col.write(f"**{header}**")
 
         # Display table rows with clickable functionality
-        for idx, row in filtered.iterrows():
+        for display_idx, (global_idx, row) in enumerate(filtered.iterrows()):
             cols = st.columns([1, 2, 1, 1, 1, 1])
             cols[0].write(row["Status"])
-            # Make the entire row clickable by wrapping in a button
-            if cols[1].button(row["Program Name"], key=f"program_{idx}"):
-                global_idx = idx
+            if cols[1].button(row["Program Name"], key=f"program_{global_idx}"):
+                st.write(f"Debug: Clicked program at global index {global_idx}")  # Temporary debug
                 if global_idx < len(data):  # Sample data program
                     selected_program = {
                         "Program": {
@@ -113,6 +112,7 @@ def render_we_earn(navigate_to):
                 else:  # Unverified program
                     unverified_idx = global_idx - len(data)
                     selected_program = unverified_programs[unverified_idx]
+                st.write(f"Debug: Navigating to program_details with program: {selected_program['Program']['Name']}")  # Temporary debug
                 navigate_to("program_details", selected_program)
             cols[2].write(row["Program Owner"])
             cols[3].write(row["Segment"])
