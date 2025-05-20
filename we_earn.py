@@ -4,6 +4,9 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
+    # Debug: Display current session state
+    st.write(f"Debug: Current session state - page: {st.session_state.get('page')}, selected_program: {st.session_state.get('selected_program')}")
+
     # Sample data
     data = pd.DataFrame([
         {
@@ -81,12 +84,12 @@ def render_we_earn(navigate_to):
     display_data["Earnings $"] = display_data["Earnings $"].apply(lambda x: f"${x:,.2f}")
     display_data["Earnings %"] = display_data["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Add a "View Details" column with buttons
+    # Add a "View Details" column (for display only)
     display_data["View Details"] = [
         f"View {row['Program Name']}" for _, row in display_data.iterrows()
     ]
 
-    # 🧾 Display table with Status in Column A and View Details column
+    # 🧾 Display table
     display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %", "View Details"]
     st.dataframe(
         display_data[display_columns],
@@ -112,10 +115,16 @@ def render_we_earn(navigate_to):
             },
             "Status": row["Status"]
         }
-        if st.button(f"View {row['Program Name']}", key=f"view_details_{row['Program Name']}_{i}"):
-            st.write(f"Debug: Clicking View for {row['Program Name']}, navigating to program_details")
-            navigate_to("program_details", program=program_data)
+        button_key = f"view_details_{row['Program Name'].replace(' ', '_')}_{i}"
+        if st.button(f"View {row['Program Name']}", key=button_key):
+            st.write(f"Debug: Clicked 'View {row['Program Name']}' with key {button_key}")
+            st.write(f"Debug: Setting selected_program to {program_data}")
+            st.session_state.selected_program = program_data
+            st.session_state.page = "program_details"
+            st.write(f"Debug: Triggering navigation to program_details with selected_program: {st.session_state.selected_program}")
+            st.rerun()
 
     st.markdown("---")
     if st.button("➕ Create Program"):
+        st.write("Debug: Navigating to program_upload")
         navigate_to("program_upload")
