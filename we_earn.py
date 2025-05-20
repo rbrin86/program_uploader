@@ -103,26 +103,22 @@ def render_we_earn(navigate_to):
     )
 
     # Handle navigation for View Details buttons
-    st.markdown("### Select a Program to View Details")
-    for i, row in filtered.iterrows():
-        program_data = {
-            "Program": {
-                "Name": row["Program Name"],
-                "Owner": row["Program Owner"],
-                "Segment": row["Segment"],
-                "Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
-                "End Date": f"{row['Program Year']}-12-31",    # Placeholder date
-            },
-            "Status": row["Status"]
-        }
-        button_key = f"view_details_{row['Program Name'].replace(' ', '_')}_{i}"
-        if st.button(f"View {row['Program Name']}", key=button_key):
-            st.write(f"Debug: Clicked 'View {row['Program Name']}' with key {button_key}")
-            st.write(f"Debug: Setting selected_program to {program_data}")
-            st.session_state.selected_program = program_data
-            st.session_state.page = "program_details"
-            st.write(f"Debug: Triggering navigation to program_details with selected_program: {st.session_state.selected_program}")
-            st.rerun()
+	st.markdown("### Select a Program to View Details")
+	for i, row in filtered.iterrows():
+    	program_data = {
+        	"Program": {
+            	"Name": row["Program Name"],
+            	"Owner": row["Program Owner"],
+            	"Segment": row["Segment"],
+            	"Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
+            	"End Date": f"{row['Program Year']}-12-31",    # Placeholder date
+        	},
+        	"Status": row["Status"]
+    	}
+    	button_key = f"view_details_{row['Program Name'].replace(' ', '_')}_{i}"
+    	if st.button(f"View {row['Program Name']}", key=button_key):
+        	st.write(f"Debug: Navigating to program_details with: {program_data}")
+        	navigate_to("program_details", program_data)
 
     st.markdown("---")
     if st.button("➕ Create Program"):
