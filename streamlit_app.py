@@ -15,7 +15,6 @@ if "selected_program" not in st.session_state:
 # Navigation sidebar
 st.sidebar.title("Navigation")
 page_options = ["we_earn", "program_upload", "content_queue"]
-# Set default index to 0 if current page is not in page_options
 default_index = page_options.index(st.session_state.page) if st.session_state.page in page_options else 0
 selected_page = st.sidebar.selectbox("Go to", page_options, index=default_index)
 
@@ -28,7 +27,7 @@ if selected_page != st.session_state.page:
 def navigate_to(page, program=None):
     st.session_state.page = page
     st.session_state.selected_program = program
-    st.rerun()
+    st.experimental_rerun()  # Explicitly use experimental_rerun for reliability
 
 # Render the selected page
 if st.session_state.page == "we_earn":

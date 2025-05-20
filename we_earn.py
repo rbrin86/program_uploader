@@ -25,16 +25,6 @@ def render_we_earn(navigate_to):
             "Earnings $": 8700,
             "Earnings %": 9.2,
             "Status": "Verified"
-        },
-        {
-            "Program Name": "Growth Incentive Q1",
-            "Program Owner": "BASF",
-            "Segment": "Seed",
-            "Program Year": "2024",
-            "Originator": "Supplier provided",
-            "Earnings $": 22100,
-            "Earnings %": 14.0,
-            "Status": "Verified"
         }
     ])
 
@@ -92,27 +82,27 @@ def render_we_earn(navigate_to):
             col.write(f"**{header}**")
 
         # Display table rows with clickable functionality
-        for display_idx, (global_idx, row) in enumerate(filtered.iterrows()):
+        for idx, row in filtered.iterrows():
             cols = st.columns([1, 2, 1, 1, 1, 1])
             cols[0].write(row["Status"])
-            if cols[1].button(row["Program Name"], key=f"program_{global_idx}"):
-                st.write(f"Debug: Clicked program at global index {global_idx}")  # Temporary debug
-                if global_idx < len(data):  # Sample data program
+            if cols[1].button(row["Program Name"], key=f"program_{idx}"):
+                st.write(f"Debug: Clicked program at index {idx}")  # Debug message
+                if idx < len(data):  # Sample data program
                     selected_program = {
                         "Program": {
-                            "Name": data.iloc[global_idx]["Program Name"],
-                            "Owner": data.iloc[global_idx]["Program Owner"],
-                            "Start Date": f"{data.iloc[global_idx]['Program Year']}-01-01",
-                            "End Date": f"{data.iloc[global_idx]['Program Year']}-12-31",
-                            "Segment": data.iloc[global_idx]["Segment"]
+                            "Name": data.iloc[idx]["Program Name"],
+                            "Owner": data.iloc[idx]["Program Owner"],
+                            "Start Date": f"{data.iloc[idx]['Program Year']}-01-01",
+                            "End Date": f"{data.iloc[idx]['Program Year']}-12-31",
+                            "Segment": data.iloc[idx]["Segment"]
                         },
                         "Incentives": [],  # Placeholder
-                        "Status": data.iloc[global_idx]["Status"]
+                        "Status": data.iloc[idx]["Status"]
                     }
                 else:  # Unverified program
-                    unverified_idx = global_idx - len(data)
+                    unverified_idx = idx - len(data)
                     selected_program = unverified_programs[unverified_idx]
-                st.write(f"Debug: Navigating to program_details with program: {selected_program['Program']['Name']}")  # Temporary debug
+                st.write(f"Debug: Navigating to program_details with program: {selected_program['Program']['Name']}")  # Debug message
                 navigate_to("program_details", selected_program)
             cols[2].write(row["Program Owner"])
             cols[3].write(row["Segment"])
