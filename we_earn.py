@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
@@ -76,48 +77,41 @@ def render_we_earn(navigate_to):
     if selected_status != "All":
         filtered = filtered[filtered["Status"] == selected_status]
 
-    # 💵 Format earnings for display
-    display_data = filtered.copy()
-    display_data["Earnings $"] = display_data["Earnings $"].apply(lambda x: f"${x:,.2f}")
-    display_data["Earnings %"] = display_data["Earnings %"].apply(lambda x: f"{x:.1f}%")
+    # Format earnings
+    filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
+    filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Display the table (initial)
-    st.dataframe(display_data, use_container_width=True)
+    # Configure AgGrid
+    gb = GridOptionsBuilder.from_dataframe(filtered)
+    gb.configure_pagination()
+    gb.configure_selection(selection_mode="single", use_checkbox=False)
+    gb.configure_grid_options(domLayout='normal')
+    grid_options = gb.build()
 
-    # Clickable selection
-    st.markdown("### Select a Program to View Details")
-    program_names = [
-        f"{row['Program Name']} ({row['Program Owner']}, {row['Program Year']})"
-        for _, row in filtered.iterrows()
-    ]
+    # Show interactive table
+    response = AgGrid(
+        filtered,
+        gridOptions=grid_options,
+        update_mode=GridUpdateMode.SELECTION_CHANGED,
+        height=400,
+        use_container_width=True,
+    )
 
-    if program_names:
-        selected_index = st.radio("Choose a program:", options=range(len(filtered)), format_func=lambda i: program_names[i], key="selected_row")
-
-        # Optional: highlight selected row
-        def highlight_selected(row):
-            if row["Program Name"] == filtered.iloc[selected_index]["Program Name"]:
-                return ['background-color: #e0f7fa'] * len(row)
-            return [''] * len(row)
-
-        styled_table = display_data.style.apply(highlight_selected, axis=1)
-        st.dataframe(styled_table, use_container_width=True)
-
-        if st.button("🔍 View Selected Program"):
-            row = filtered.iloc[selected_index]
-            program_data = {
-                "Program": {
-                    "Name": row["Program Name"],
-                    "Owner": row["Program Owner"],
-                    "Segment": row["Segment"],
-                    "Start Date": f"{row['Program Year']}-01-01",
-                    "End Date": f"{row['Program Year']}-12-31",
-                },
-                "Status": row["Status"]
-            }
-            navigate_to("program_details", program_data)
-    else:
-        st.info("No programs match your filters.")
+    # Navigate on row selection
+    selected_rows = response["selected_rows"]
+    if selected_rows:
+        row = selected_rows[0]
+        program_data = {
+            "Program": {
+                "Name": row["Program Name"],
+                "Owner": row["Program Owner"],
+                "Segment": row["Segment"],
+                "Start Date": f"{row['Program Year']}-01-01",
+                "End Date": f"{row['Program Year']}-12-31",
+            },
+            "Status": row["Status"]
+        }
+        navigate_to("program_details", program_data)
 
     st.markdown("---")
     if st.button("➕ Create Program"):
