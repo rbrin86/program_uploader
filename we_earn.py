@@ -4,7 +4,7 @@ import pandas as pd
 def render_we_earn(navigate_to):
     st.title("💰 We Earn – Programs Overview")
 
-    # Sample data
+    # Verified sample programs (typically from backend)
     data = pd.DataFrame([
         {
             "Program Name": "Early Order Bonus 2025",
@@ -38,7 +38,7 @@ def render_we_earn(navigate_to):
         }
     ])
 
-    # Append unverified programs from session state
+    # Append unverified programs before filtering
     unverified_programs = st.session_state.get("unverified_programs", [])
     if unverified_programs:
         unverified_data = pd.DataFrame([
@@ -48,14 +48,14 @@ def render_we_earn(navigate_to):
                 "Segment": program["Program"]["Segment"],
                 "Program Year": program["Program"]["Start Date"][:4],
                 "Originator": "Created as Unverified by My Org",
-                "Earnings $": 0,
-                "Earnings %": 0.0,
+                "Earnings $": program.get("Earnings", {}).get("$", 0),
+                "Earnings %": program.get("Earnings", {}).get("%", 0.0),
                 "Status": program["Status"]
             } for program in unverified_programs
         ])
         data = pd.concat([data, unverified_data], ignore_index=True)
 
-    # 🔍 Filters
+    # 🔍 Sidebar Filters
     st.sidebar.header("🔎 Filter Programs")
     selected_year = st.sidebar.selectbox("Program Year", ["All"] + sorted(data["Program Year"].unique()), index=0)
     selected_owner = st.sidebar.selectbox("Program Owner", ["All"] + sorted(data["Program Owner"].unique()), index=0)
@@ -81,7 +81,7 @@ def render_we_earn(navigate_to):
     display_data["Earnings $"] = display_data["Earnings $"].apply(lambda x: f"${x:,.2f}")
     display_data["Earnings %"] = display_data["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Display table without Originator or Program Year
+    # Display table (no Program Year or Originator)
     display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %"]
     st.dataframe(display_data[display_columns], use_container_width=True)
 
@@ -99,7 +99,11 @@ def render_we_earn(navigate_to):
                     "Start Date": f"{row['Program Year']}-01-01",
                     "End Date": f"{row['Program Year']}-12-31",
                 },
-                "Status": row["Status"]
+                "Status": row["Status"],
+                "Earnings": {
+                    "$": row["Earnings $"] if isinstance(row["Earnings $"], (int, float)) else None,
+                    "%": row["Earnings %"] if isinstance(row["Earnings %"], (int, float)) else None,
+                }
             }
             navigate_to("program_details", program_data)
 
