@@ -99,7 +99,7 @@ def render_we_earn(navigate_to):
 
     # Navigate on row selection
     selected_rows = response["selected_rows"]
-    if selected_rows:
+    if selected_rows and len(selected_rows) > 0:
         row = selected_rows[0]
         program_data = {
             "Program": {
