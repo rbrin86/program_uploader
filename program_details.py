@@ -2,15 +2,12 @@ import streamlit as st
 import pandas as pd
 
 def render_program_details(navigate_to):
-    st.write("Debug: Entering Program Details page")
-    st.write(f"Debug: Selected program: {st.session_state.get('selected_program')}")
     st.title("📋 Program Details")
     selected_program = st.session_state.get("selected_program")
 
     if not selected_program:
         st.error("No program selected. Please select a program from the 'We Earn' page.")
         if st.button("🔙 Back to We Earn", key="back_to_we_earn"):
-            st.write("Debug: Back to We Earn clicked")
             navigate_to("we_earn", None)
         return
 
@@ -30,7 +27,7 @@ def render_program_details(navigate_to):
             col1.write(f"**Segment:** {selected_program['Program']['Segment']}")
         st.write(f"**YTD Earnings:** $5,994.16 (0.18% of YTD earnings)")
 
-        # Incentives/Price Rules Table
+        # Incentives Table
         st.subheader("Incentives")
         incentives = selected_program.get("Incentives", [])
         if not incentives:
@@ -74,7 +71,17 @@ def render_program_details(navigate_to):
     with tab2:
         st.subheader("Cases")
         with st.container():
-            st.write("No cases associated with this program yet.")
+            cases = [
+                {
+                    "Case ID": "CASE-00123",
+                    "Subject": "BASF Rebate Program",
+                    "Assignee": "Joey C",
+                    "Status": "In Progress",
+                    "Last Updated": "2025-05-20",
+                }
+            ]
+            case_df = pd.DataFrame(cases)
+            st.table(case_df)
 
     # Tab 3: Accommodations
     with tab3:
@@ -84,5 +91,4 @@ def render_program_details(navigate_to):
 
     st.markdown("---")
     if st.button("🔙 Back to We Earn", key="back_to_we_earn_details"):
-        st.write("Debug: Back to We Earn clicked")
         navigate_to("we_earn", None)
