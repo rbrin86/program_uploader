@@ -1,4 +1,3 @@
-
 import streamlit as st
 from we_earn import render_we_earn
 from program_upload import render_program_upload
@@ -11,34 +10,49 @@ if "page" not in st.session_state:
 if "selected_program" not in st.session_state:
     st.session_state.selected_program = None
 
-# Debug: Display session state in sidebar
-st.sidebar.title("Navigation")
-st.sidebar.write(f"Debug: Current page: {st.session_state.page}")
-st.sidebar.write(f"Debug: Selected program: {st.session_state.selected_program}")
+# Sidebar: Navigation
+st.sidebar.title("🧭 Navigation")
 
-# Navigation sidebar
+# Define visible and hidden pages
 visible_pages = ["we_earn", "program_upload", "content_queue"]
-page_options = visible_pages + ["program_details"]
+page_options = visible_pages + ["program_details"]  # Include hidden pages for logic
 
-selected_page = st.sidebar.selectbox("Go to", visible_pages, index=visible_pages.index(st.session_state.page) if st.session_state.page in visible_pages else 0)
+# Show selectbox only for visible pages
+if st.session_state.page in visible_pages:
+    selected_page = st.sidebar.selectbox(
+        "Go to",
+        visible_pages,
+        index=visible_pages.index(st.session_state.page)
+    )
+else:
+    # For hidden pages like 'program_details', don't show in dropdown
+    selected_page = st.session_state.page
+    st.sidebar.markdown(f"**Viewing:** Program Details")
 
-default_index = page_options.index(st.session_state.page) if st.session_state.page in page_options else 0
-selected_page = st.sidebar.selectbox("Go to", page_options, index=default_index)
-
-# Update page state if changed
+# Update page if changed
 if selected_page != st.session_state.page:
-    st.write(f"Debug: Sidebar navigation to {selected_page}")
     st.session_state.page = selected_page
-    st.session_state.selected_program = None  # Reset on page change
+    st.session_state.selected_program = None  # Reset program when switching pages
     st.rerun()
 
 # Render the selected page
-st.write(f"Debug: Rendering page: {st.session_state.page}")
 if st.session_state.page == "we_earn":
-    render_we_earn(lambda page, program=None: (st.session_state.update({"page": page, "selected_program": program}), st.rerun()))
+    render_we_earn(lambda page, program=None: (
+        st.session_state.update({"page": page, "selected_program": program}),
+        st.rerun()
+    ))
 elif st.session_state.page == "program_upload":
-    render_program_upload(lambda page, program=None: (st.session_state.update({"page": page, "selected_program": program}), st.rerun()))
+    render_program_upload(lambda page, program=None: (
+        st.session_state.update({"page": page, "selected_program": program}),
+        st.rerun()
+    ))
 elif st.session_state.page == "content_queue":
-    render_content_queue(lambda page, program=None: (st.session_state.update({"page": page, "selected_program": program}), st.rerun()))
+    render_content_queue(lambda page, program=None: (
+        st.session_state.update({"page": page, "selected_program": program}),
+        st.rerun()
+    ))
 elif st.session_state.page == "program_details":
-    render_program_details(lambda page, program=None: (st.session_state.update({"page": page, "selected_program": program}), st.rerun()))
+    render_program_details(lambda page, program=None: (
+        st.session_state.update({"page": page, "selected_program": program}),
+        st.rerun()
+    ))
