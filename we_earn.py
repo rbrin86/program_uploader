@@ -77,30 +77,43 @@ def render_we_earn(navigate_to):
     if selected_status != "All":
         filtered = filtered[filtered["Status"] == selected_status]
 
-    # Format earnings
+    # 💵 Format earnings for display
     filtered["Earnings $"] = filtered["Earnings $"].apply(lambda x: f"${x:,.2f}")
     filtered["Earnings %"] = filtered["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Configure AgGrid
-    gb = GridOptionsBuilder.from_dataframe(filtered)
+    # 🎯 Columns to show in the table
+    display_columns = [
+        "Status",
+        "Program Name",
+        "Program Owner",
+        "Segment",
+        "Earnings $",
+        "Earnings %"
+    ]
+    filtered_display = filtered[display_columns]
+
+    # ⚙️ Configure AgGrid
+    gb = GridOptionsBuilder.from_dataframe(filtered_display)
     gb.configure_pagination()
     gb.configure_selection(selection_mode="single", use_checkbox=False)
     gb.configure_grid_options(domLayout='normal')
     grid_options = gb.build()
 
-    # Show interactive table
+    # 📊 Show interactive table
     response = AgGrid(
-        filtered,
+        filtered_display,
         gridOptions=grid_options,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
         height=400,
         use_container_width=True,
     )
 
-    # Navigate on row selection
-    selected_rows = response["selected_rows"]
-    if selected_rows and len(selected_rows) > 0:
-        row = selected_rows[0]
+    # 🧭 Navigate on row selection
+    selected_rows = response.get("selected_rows", [])
+    if isinstance(selected_rows, list) and len(selected_rows) > 0:
+        selected_name = selected_rows[0]["Program Name"]
+        row = filtered[filtered["Program Name"] == selected_name].iloc[0]
+
         program_data = {
             "Program": {
                 "Name": row["Program Name"],
