@@ -111,8 +111,13 @@ def render_we_earn(navigate_to):
     # 🧭 Navigate on row selection
     selected_rows = response.get("selected_rows", [])
     if isinstance(selected_rows, list) and len(selected_rows) > 0:
-        selected_name = selected_rows[0]["Program Name"]
-        row = filtered[filtered["Program Name"] == selected_name].iloc[0]
+        sel = selected_rows[0]
+        match = (
+            (filtered["Program Name"] == sel["Program Name"]) &
+            (filtered["Program Owner"] == sel["Program Owner"]) &
+            (filtered["Segment"] == sel["Segment"])
+        )
+        row = filtered[match].iloc[0]
 
         program_data = {
             "Program": {
