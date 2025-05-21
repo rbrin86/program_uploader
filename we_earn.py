@@ -81,43 +81,44 @@ def render_we_earn(navigate_to):
     display_data["Earnings $"] = display_data["Earnings $"].apply(lambda x: f"${x:,.2f}")
     display_data["Earnings %"] = display_data["Earnings %"].apply(lambda x: f"{x:.1f}%")
 
-    # Add a "View Details" column (for display only)
-    display_data["View Details"] = [
-        f"View {row['Program Name']}" for _, row in display_data.iterrows()
+    # Display the table (initial)
+    st.dataframe(display_data, use_container_width=True)
+
+    # Clickable selection
+    st.markdown("### Select a Program to View Details")
+    program_names = [
+        f"{row['Program Name']} ({row['Program Owner']}, {row['Program Year']})"
+        for _, row in filtered.iterrows()
     ]
 
-    # 🧾 Display table
-    display_columns = ["Status", "Program Name", "Program Owner", "Segment", "Earnings $", "Earnings %", "View Details"]
-    st.dataframe(
-        display_data[display_columns],
-        use_container_width=True,
-        column_config={
-            "Status": st.column_config.TextColumn("Status", width="small"),
-            "Program Name": st.column_config.TextColumn("Program Name", width="medium"),
-            "View Details": st.column_config.TextColumn("View Details", width="small")
-        },
-        hide_index=True
-    )
+    if program_names:
+        selected_index = st.radio("Choose a program:", options=range(len(filtered)), format_func=lambda i: program_names[i], key="selected_row")
 
-    # Handle navigation for View Details buttons
-    st.markdown("### Select a Program to View Details")
-    for i, row in filtered.iterrows():
-        program_data = {
-            "Program": {
-                "Name": row["Program Name"],
-                "Owner": row["Program Owner"],
-                "Segment": row["Segment"],
-                "Start Date": f"{row['Program Year']}-01-01",  # Placeholder date
-                "End Date": f"{row['Program Year']}-12-31",    # Placeholder date
-            },
-            "Status": row["Status"]
-        }
-        button_key = f"view_details_{row['Program Name'].replace(' ', '_')}_{i}"
-        if st.button(f"View {row['Program Name']}", key=button_key):
-            st.write(f"Debug: Navigating to program_details with: {program_data}")
+        # Optional: highlight selected row
+        def highlight_selected(row):
+            if row["Program Name"] == filtered.iloc[selected_index]["Program Name"]:
+                return ['background-color: #e0f7fa'] * len(row)
+            return [''] * len(row)
+
+        styled_table = display_data.style.apply(highlight_selected, axis=1)
+        st.dataframe(styled_table, use_container_width=True)
+
+        if st.button("🔍 View Selected Program"):
+            row = filtered.iloc[selected_index]
+            program_data = {
+                "Program": {
+                    "Name": row["Program Name"],
+                    "Owner": row["Program Owner"],
+                    "Segment": row["Segment"],
+                    "Start Date": f"{row['Program Year']}-01-01",
+                    "End Date": f"{row['Program Year']}-12-31",
+                },
+                "Status": row["Status"]
+            }
             navigate_to("program_details", program_data)
+    else:
+        st.info("No programs match your filters.")
 
     st.markdown("---")
     if st.button("➕ Create Program"):
-        st.write("Debug: Navigating to program_upload")
         navigate_to("program_upload")
