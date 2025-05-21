@@ -11,19 +11,19 @@ def render_content_queue(navigate_to):
         {
             "Program Name": "Early Order Bonus 2025",
             "Customer": "Wilbur",
-            "AI Confidence": "92%",
+            "AI Confidence (Duplicate Score)": "92%",
             "Status": "Needs Review"
         },
         {
             "Program Name": "Early Order Bonus 2025 ",
             "Customer": "CHS",
-            "AI Confidence": "89%",
+            "AI Confidence (Duplicate Score)": "89%",
             "Status": "Needs Review"
         },
         {
             "Program Name": "Spring Start-Up Rebate",
             "Customer": "Simplot",
-            "AI Confidence": "76%",
+            "AI Confidence (Duplicate Score)": "0%",
             "Status": "Needs Review"
         }
     ]
@@ -36,7 +36,7 @@ def render_content_queue(navigate_to):
     # Simulated review actions (simple for now)
     st.subheader("Actions")
     for i, row in df.iterrows():
-        st.markdown(f"**{row['Program Name']}** – from {row['Customer']} (Confidence: {row['AI Confidence']})")
+        st.markdown(f"**{row['Program Name']}** – from {row['Customer']} (Confidence: {row['AI Confidence (Duplicate Score)']})")
         cols = st.columns(4)
         if cols[0].button("✅ Approve", key=f"approve_{i}"):
             st.success(f"{row['Program Name']} from {row['Customer']} approved.")
@@ -45,10 +45,12 @@ def render_content_queue(navigate_to):
         if cols[2].button("🔄 Update", key=f"update_{i}"):
             st.info(f"{row['Program Name']} from {row['Customer']} queued for update.")
         if cols[3].button("🔗 Merge", key=f"merge_{i}"):
-            # For now, hardcode the two programs to compare
-            st.session_state.programs_to_merge = ["Wilbur", "CHS"]
-            navigate_to("merge_programs")
-    
+            if row["Customer"] in ["Wilbur", "CHS"]:  # Only these are flagged as dupes
+                st.session_state.programs_to_merge = ["Wilbur", "CHS"]
+                navigate_to("merge_programs")
+            else:
+                st.warning(f"{row['Program Name']} from {row['Customer']} has no duplicate to merge.")
+
     st.markdown("---")
     if st.button("🔙 Back to Dashboard"):
         navigate_to("we_earn", None)
