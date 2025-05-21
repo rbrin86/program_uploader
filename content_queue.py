@@ -33,7 +33,7 @@ def render_content_queue(navigate_to):
     st.subheader("Unverified Program Submissions")
     st.table(df)
 
-    # Simulated review actions (for visual layout only)
+    # Simulated review actions (simple for now)
     st.subheader("Actions")
     for i, row in df.iterrows():
         st.markdown(f"**{row['Program Name']}** – from {row['Customer']} (Confidence: {row['AI Confidence']})")
@@ -45,8 +45,10 @@ def render_content_queue(navigate_to):
         if cols[2].button("🔄 Update", key=f"update_{i}"):
             st.info(f"{row['Program Name']} from {row['Customer']} queued for update.")
         if cols[3].button("🔗 Merge", key=f"merge_{i}"):
-            st.info(f"{row['Program Name']} from {row['Customer']} flagged for merge.")
-
+            # For now, hardcode the two programs to compare
+            st.session_state.programs_to_merge = ["Wilbur", "CHS"]
+            navigate_to("merge_programs")
+    
     st.markdown("---")
     if st.button("🔙 Back to Dashboard"):
         navigate_to("we_earn", None)

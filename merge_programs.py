@@ -67,4 +67,25 @@ def render_merge_programs(navigate_to):
         st.markdown("**Program A – Wilbur**")
         st.table(incentive_a)
     with col2:
-        st.m
+        st.markdown("**Program B – CHS**")
+        st.table(incentive_b)
+
+    st.markdown("---")
+    st.subheader("🤔 What would you like to do?")
+
+    cols = st.columns(3)
+    if cols[0].button("🔗 Merge as One Program"):
+        st.success("Programs merged into a single verified program.")
+        navigate_to("content_queue")
+
+    if cols[1].button("✅ Accept Both as Separate"):
+        st.info("Both programs accepted as unique entries.")
+        navigate_to("content_queue")
+
+    if cols[2].button("❌ Reject Program B (CHS)"):
+        st.warning("Program B rejected.")
+        navigate_to("content_queue")
+
+    st.markdown("---")
+    if st.button("🔙 Back to Content Queue"):
+        navigate_to("content_queue")
